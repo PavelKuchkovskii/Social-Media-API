@@ -1,11 +1,11 @@
-package org.kucher.socialservice.service.dto;
+package org.kucher.socialservice.service.dto.post;
 
 import org.kucher.socialservice.dao.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class PostDTO {
+public class ResponsePostDTO {
 
     private UUID uuid;
     private LocalDateTime dtCreate;

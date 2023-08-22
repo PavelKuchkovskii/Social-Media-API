@@ -1,10 +1,9 @@
-package org.kucher.socialservice.service.dto;
+package org.kucher.socialservice.service.dto.post;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class CreatePostDTO {
-
+public class PostDTO {
     private UUID uuid;
     private LocalDateTime dtCreate;
     private LocalDateTime dtUpdate;

@@ -3,14 +3,13 @@ package org.kucher.socialservice.service;
 import org.kucher.socialservice.config.utill.Time.TimeUtil;
 import org.kucher.socialservice.dao.api.IPostDao;
 import org.kucher.socialservice.dao.entity.Post;
-import org.kucher.socialservice.dao.entity.User;
 import org.kucher.socialservice.dao.entity.builder.PostBuilder;
 import org.kucher.socialservice.service.api.IPostService;
-import org.kucher.socialservice.service.dto.CreatePostDTO;
-import org.kucher.socialservice.service.dto.PostDTO;
-import org.springframework.http.ResponseEntity;
+import org.kucher.socialservice.service.dto.post.PostDTO;
+import org.kucher.socialservice.service.dto.post.CreatePostDTO;
+import org.kucher.socialservice.service.dto.post.ResponsePostDTO;
+import org.kucher.socialservice.service.dto.post.UpdatePostDTO;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -19,38 +18,39 @@ import java.util.UUID;
 
 @Service
 public class PostService implements IPostService {
-
     private final IPostDao dao;
-    private final RestTemplate restTemplate;
+    private final UserService userService;
 
-    public PostService(IPostDao dao, RestTemplate restTemplate) {
+    public PostService(IPostDao dao, UserService userService) {
         this.dao = dao;
-        this.restTemplate = restTemplate;
+        this.userService = userService;
     }
 
+
+    //Нужно проверить есть ли такой юзер
     @Override
-    public PostDTO create(CreatePostDTO dto) {
+    public ResponsePostDTO create(CreatePostDTO dto) {
 
-        CreatePostDTO created = new CreatePostDTO();
-        created.setUuid(UUID.randomUUID());
-        created.setDtCreate(TimeUtil.now());
-        created.setDtUpdate(created.getDtCreate());
-        created.setUserUuid(dto.getUserUuid());
-        created.setText(dto.getText());
-        created.setTitle(dto.getTitle());
-        created.setImageBase64(dto.getImageBase64());
+        PostDTO postDTO = new PostDTO();
+        postDTO.setUuid(UUID.randomUUID());
+        postDTO.setDtCreate(TimeUtil.now());
+        postDTO.setDtUpdate(postDTO.getDtCreate());
+        postDTO.setUserUuid(dto.getUserUuid());
+        postDTO.setText(dto.getText());
+        postDTO.setTitle(dto.getTitle());
+        postDTO.setImageBase64(dto.getImageBase64());
 
 
-        if (validate(created)) {
-            Post post = mapToEntity(created);
+        if (validate(postDTO)) {
+            Post post = mapToEntity(postDTO);
             dao.save(post);
         }
 
-        return read(created.getUuid());
+        return read(postDTO.getUuid());
     }
 
     @Override
-    public PostDTO read(UUID uuid) {
+    public ResponsePostDTO read(UUID uuid) {
         Optional<Post> optional = dao.findById(uuid);
         if(optional.isPresent()) {
             return mapToDTO(optional.get());
@@ -61,19 +61,23 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public PostDTO update(CreatePostDTO dto, UUID uuid, LocalDateTime dtUpdate) {
+    public ResponsePostDTO update(UpdatePostDTO dto, UUID uuid, LocalDateTime dtUpdate) {
         Optional<Post> optional = dao.findById(uuid);
         if(optional.isPresent()) {
             Post post = optional.get();
 
             if(dtUpdate.isEqual(post.getDtUpdate())) {
 
-                dto.setUuid(post.getUuid());
-                dto.setDtCreate(post.getDtCreate());
-                dto.setDtUpdate(TimeUtil.now());
-                dto.setUserUuid(post.getUserUuid());
+                PostDTO postDTO = new PostDTO();
+                postDTO.setUuid(uuid);
+                postDTO.setDtCreate(post.getDtCreate());
+                postDTO.setDtUpdate(TimeUtil.now());
+                postDTO.setUserUuid(post.getUserUuid());
+                postDTO.setText(dto.getText());
+                postDTO.setTitle(dto.getTitle());
+                postDTO.setImageBase64(dto.getImageBase64());
 
-                dao.save(mapToEntity(dto));
+                dao.save(mapToEntity(postDTO));
 
                 return read(post.getUuid());
             }
@@ -101,12 +105,12 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public boolean validate(CreatePostDTO dto) {
+    public boolean validate(PostDTO dto) {
         return true;
     }
 
     @Override
-    public Post mapToEntity(CreatePostDTO dto) {
+    public Post mapToEntity(PostDTO dto) {
         return PostBuilder
                 .create()
                 .setUuid(dto.getUuid())
@@ -120,26 +124,18 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public PostDTO mapToDTO(Post post) {
-        PostDTO dto = new PostDTO();
+    public ResponsePostDTO mapToDTO(Post post) {
+        ResponsePostDTO dto = new ResponsePostDTO();
 
         dto.setUuid(post.getUuid());
         dto.setDtCreate(post.getDtCreate());
         dto.setDtUpdate(post.getDtUpdate());
-        dto.setUser(getUserByUuid(post.getUserUuid()).getBody());
+        dto.setUser(userService.getUserByUuid(post.getUserUuid()));
         dto.setText(post.getText());
         dto.setTitle(post.getTitle());
         dto.setImageBase64(Base64.getEncoder().encodeToString(post.getImage())); //Encode image from byte[] to base64
 
         return dto;
     }
-
-    @Override
-    public ResponseEntity<User> getUserByUuid(UUID userUuid) {
-        String userUrl = "http://localhost:8080/users/{userUuid}";
-
-        return restTemplate.getForEntity(userUrl, User.class, userUuid);
-    }
-
 
 }

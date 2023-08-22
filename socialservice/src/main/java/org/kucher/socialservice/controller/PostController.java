@@ -1,8 +1,9 @@
 package org.kucher.socialservice.controller;
 
 import org.kucher.socialservice.service.api.IPostService;
-import org.kucher.socialservice.service.dto.CreatePostDTO;
-import org.kucher.socialservice.service.dto.PostDTO;
+import org.kucher.socialservice.service.dto.post.CreatePostDTO;
+import org.kucher.socialservice.service.dto.post.ResponsePostDTO;
+import org.kucher.socialservice.service.dto.post.UpdatePostDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,25 +22,25 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostDTO> doPost(@RequestBody CreatePostDTO dto) {
+    public ResponseEntity<ResponsePostDTO> doPost(@RequestBody CreatePostDTO dto) {
 
-        PostDTO created = service.create(dto);
+        ResponsePostDTO created = service.create(dto);
 
         return new ResponseEntity<>(created, HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<PostDTO> doGet(@PathVariable("uuid")UUID uuid) {
+    public ResponseEntity<ResponsePostDTO> doGet(@PathVariable("uuid")UUID uuid) {
 
-        PostDTO read = service.read(uuid);
+        ResponsePostDTO read = service.read(uuid);
 
         return new ResponseEntity<>(read, HttpStatus.OK);
     }
 
     @PatchMapping("/{uuid}/dt_update/{dt_update}")
-    public ResponseEntity<PostDTO> doUpdate(@RequestBody CreatePostDTO dto, @PathVariable("uuid")UUID uuid, @PathVariable("dt_update")LocalDateTime dtUpdate) {
+    public ResponseEntity<ResponsePostDTO> doUpdate(@RequestBody UpdatePostDTO dto, @PathVariable("uuid")UUID uuid, @PathVariable("dt_update")LocalDateTime dtUpdate) {
 
-        PostDTO created = service.update(dto, uuid, dtUpdate);
+        ResponsePostDTO created = service.update(dto, uuid, dtUpdate);
 
         return new ResponseEntity<>(created, HttpStatus.OK);
     }

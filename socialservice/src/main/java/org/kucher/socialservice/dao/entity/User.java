@@ -21,6 +21,10 @@ public class User implements IUser {
     public User() {
     }
 
+    public User(UUID uuid) {
+        this.uuid = uuid;
+    }
+
     public User(UUID uuid, String email, String name, String surname) {
         this.uuid = uuid;
         this.email = email;

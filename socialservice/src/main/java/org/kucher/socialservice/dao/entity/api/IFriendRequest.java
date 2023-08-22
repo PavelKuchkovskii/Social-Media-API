@@ -5,11 +5,11 @@ import org.kucher.socialservice.dao.entity.enums.EFriendRequestStatus;
 
 import java.util.UUID;
 
-public interface IFriendRequest {
+public interface IFriendRequest extends IEssence {
 
     UUID getUuid();
-    User getSenderUuid();
-    User getReceiverUuid();
+    User getSender();
+    User getReceiver();
 
     EFriendRequestStatus getStatus();
 }
