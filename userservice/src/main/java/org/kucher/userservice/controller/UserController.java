@@ -21,10 +21,18 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> doGet() {
+    public ResponseEntity<UserDTO> doGetMe() {
 
         UUID uuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
         UserDTO user = this.service.read(uuid);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @GetMapping("/{uuid}")
+    public ResponseEntity<UserDTO> doGetUser(@PathVariable("uuid")UUID uuid) {
+
+        UserDTO user = this.service.read(uuid);
+
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

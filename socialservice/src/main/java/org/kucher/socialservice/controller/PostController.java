@@ -1,6 +1,7 @@
 package org.kucher.socialservice.controller;
 
 import org.kucher.socialservice.service.api.IPostService;
+import org.kucher.socialservice.service.dto.CreatePostDTO;
 import org.kucher.socialservice.service.dto.PostDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,14 +14,14 @@ import java.util.UUID;
 @RequestMapping("/posts")
 public class PostController {
 
-    private IPostService service;
+    private final IPostService service;
 
     public PostController(IPostService service) {
         this.service = service;
     }
 
     @PostMapping
-    public ResponseEntity<PostDTO> doPost(@RequestBody PostDTO dto) {
+    public ResponseEntity<PostDTO> doPost(@RequestBody CreatePostDTO dto) {
 
         PostDTO created = service.create(dto);
 
@@ -36,7 +37,7 @@ public class PostController {
     }
 
     @PatchMapping("/{uuid}/dt_update/{dt_update}")
-    public ResponseEntity<PostDTO> doUpdate(@RequestBody PostDTO dto,@PathVariable("uuid")UUID uuid, @PathVariable("dt_update")LocalDateTime dtUpdate) {
+    public ResponseEntity<PostDTO> doUpdate(@RequestBody CreatePostDTO dto, @PathVariable("uuid")UUID uuid, @PathVariable("dt_update")LocalDateTime dtUpdate) {
 
         PostDTO created = service.update(dto, uuid, dtUpdate);
 

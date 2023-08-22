@@ -1,7 +1,6 @@
 package org.kucher.socialservice.dao.entity.builder;
 
 import org.kucher.socialservice.dao.entity.Post;
-import org.springframework.security.core.parameters.P;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

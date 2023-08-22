@@ -1,16 +1,14 @@
 package org.kucher.socialservice.service.dto;
 
-import org.kucher.socialservice.dao.entity.User;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class PostDTO {
+public class CreatePostDTO {
 
     private UUID uuid;
     private LocalDateTime dtCreate;
     private LocalDateTime dtUpdate;
-    private User user;
+    private UUID userUuid;
     private String text;
     private String title;
     private String imageBase64;
@@ -39,12 +37,12 @@ public class PostDTO {
         this.dtUpdate = dtUpdate;
     }
 
-    public User getUser() {
-        return user;
+    public UUID getUserUuid() {
+        return userUuid;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserUuid(UUID userUuid) {
+        this.userUuid = userUuid;
     }
 
     public String getText() {

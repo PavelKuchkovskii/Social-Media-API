@@ -3,10 +3,14 @@ package org.kucher.socialservice.service;
 import org.kucher.socialservice.config.utill.Time.TimeUtil;
 import org.kucher.socialservice.dao.api.IPostDao;
 import org.kucher.socialservice.dao.entity.Post;
+import org.kucher.socialservice.dao.entity.User;
 import org.kucher.socialservice.dao.entity.builder.PostBuilder;
 import org.kucher.socialservice.service.api.IPostService;
+import org.kucher.socialservice.service.dto.CreatePostDTO;
 import org.kucher.socialservice.service.dto.PostDTO;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -16,16 +20,18 @@ import java.util.UUID;
 @Service
 public class PostService implements IPostService {
 
-    private IPostDao dao;
+    private final IPostDao dao;
+    private final RestTemplate restTemplate;
 
-    public PostService(IPostDao dao) {
+    public PostService(IPostDao dao, RestTemplate restTemplate) {
         this.dao = dao;
+        this.restTemplate = restTemplate;
     }
 
     @Override
-    public PostDTO create(PostDTO dto) {
+    public PostDTO create(CreatePostDTO dto) {
 
-        PostDTO created = new PostDTO();
+        CreatePostDTO created = new CreatePostDTO();
         created.setUuid(UUID.randomUUID());
         created.setDtCreate(TimeUtil.now());
         created.setDtUpdate(created.getDtCreate());
@@ -40,7 +46,7 @@ public class PostService implements IPostService {
             dao.save(post);
         }
 
-        return created;
+        return read(created.getUuid());
     }
 
     @Override
@@ -55,20 +61,21 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public PostDTO update(PostDTO dto, UUID uuid, LocalDateTime dtUpdate) {
+    public PostDTO update(CreatePostDTO dto, UUID uuid, LocalDateTime dtUpdate) {
         Optional<Post> optional = dao.findById(uuid);
         if(optional.isPresent()) {
-            PostDTO postDTO = mapToDTO(optional.get());
+            Post post = optional.get();
 
-            if(dtUpdate.isEqual(postDTO.getDtUpdate())) {
-                postDTO.setDtUpdate(TimeUtil.now());
-                postDTO.setText(dto.getText());
-                postDTO.setTitle(dto.getTitle());
-                postDTO.setImageBase64(dto.getImageBase64());
+            if(dtUpdate.isEqual(post.getDtUpdate())) {
 
-                dao.save(mapToEntity(postDTO));
+                dto.setUuid(post.getUuid());
+                dto.setDtCreate(post.getDtCreate());
+                dto.setDtUpdate(TimeUtil.now());
+                dto.setUserUuid(post.getUserUuid());
 
-                return postDTO;
+                dao.save(mapToEntity(dto));
+
+                return read(post.getUuid());
             }
             else {
                 throw new RuntimeException("Post already update");
@@ -94,12 +101,12 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public boolean validate(PostDTO dto) {
+    public boolean validate(CreatePostDTO dto) {
         return true;
     }
 
     @Override
-    public Post mapToEntity(PostDTO dto) {
+    public Post mapToEntity(CreatePostDTO dto) {
         return PostBuilder
                 .create()
                 .setUuid(dto.getUuid())
@@ -119,12 +126,20 @@ public class PostService implements IPostService {
         dto.setUuid(post.getUuid());
         dto.setDtCreate(post.getDtCreate());
         dto.setDtUpdate(post.getDtUpdate());
-        dto.setUserUuid(post.getUserUuid());
+        dto.setUser(getUserByUuid(post.getUserUuid()).getBody());
         dto.setText(post.getText());
         dto.setTitle(post.getTitle());
         dto.setImageBase64(Base64.getEncoder().encodeToString(post.getImage())); //Encode image from byte[] to base64
 
         return dto;
     }
+
+    @Override
+    public ResponseEntity<User> getUserByUuid(UUID userUuid) {
+        String userUrl = "http://localhost:8080/users/{userUuid}";
+
+        return restTemplate.getForEntity(userUrl, User.class, userUuid);
+    }
+
 
 }
