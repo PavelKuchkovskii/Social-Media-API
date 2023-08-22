@@ -24,11 +24,13 @@ public class FriendRequestService implements IFriendRequestService{
     private final IFriendRequestDao dao;
     private final UserService userService;
     private final SubscriptionService subscriptionService;
+    private final FriendshipService friendshipService;
 
-    public FriendRequestService(IFriendRequestDao dao, UserService userService, SubscriptionService subscriptionService) {
+    public FriendRequestService(IFriendRequestDao dao, UserService userService, SubscriptionService subscriptionService, FriendshipService friendshipService) {
         this.dao = dao;
         this.userService = userService;
         this.subscriptionService = subscriptionService;
+        this.friendshipService = friendshipService;
     }
 
     @Override
@@ -79,6 +81,7 @@ public class FriendRequestService implements IFriendRequestService{
                 if(EFriendRequestStatus.get(dto.getStatus()).equals(EFriendRequestStatus.ACCEPTED)) {
                     //Create subscription
                     subscriptionService.create(friendRequest.getSenderUuid());
+                    friendshipService.create(friendRequest);
                 }
 
                 FriendRequestDTO friendRequestDTO = new FriendRequestDTO();
@@ -94,11 +97,11 @@ public class FriendRequestService implements IFriendRequestService{
                 return read(friendRequest.getUuid());
             }
             else {
-                throw new RuntimeException("Post already update");
+                throw new RuntimeException("FriendRequest already update");
             }
         }
         else {
-            throw new RuntimeException("Post not found");
+            throw new RuntimeException("FriendRequest not found");
         }
     }
 
