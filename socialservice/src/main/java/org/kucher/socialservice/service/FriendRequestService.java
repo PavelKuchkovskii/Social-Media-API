@@ -3,7 +3,6 @@ package org.kucher.socialservice.service;
 import org.kucher.socialservice.config.utill.Time.TimeUtil;
 import org.kucher.socialservice.dao.api.IFriendRequestDao;
 import org.kucher.socialservice.dao.entity.FriendRequest;
-import org.kucher.socialservice.dao.entity.User;
 import org.kucher.socialservice.dao.entity.builder.FriendRequestBuilder;
 import org.kucher.socialservice.dao.entity.enums.EFriendRequestStatus;
 import org.kucher.socialservice.service.api.IFriendRequestService;
@@ -24,10 +23,12 @@ public class FriendRequestService implements IFriendRequestService{
 
     private final IFriendRequestDao dao;
     private final UserService userService;
+    private final SubscriptionService subscriptionService;
 
-    public FriendRequestService(IFriendRequestDao dao, UserService userService) {
+    public FriendRequestService(IFriendRequestDao dao, UserService userService, SubscriptionService subscriptionService) {
         this.dao = dao;
         this.userService = userService;
+        this.subscriptionService = subscriptionService;
     }
 
     @Override
@@ -43,6 +44,10 @@ public class FriendRequestService implements IFriendRequestService{
         friendRequestDTO.setStatus(EFriendRequestStatus.WAITING);
 
         if (validate(friendRequestDTO)) {
+
+            //Create subscription
+            subscriptionService.create(friendRequestDTO.getReceiverUuid());
+
             FriendRequest friendRequest = mapToEntity(friendRequestDTO);
             dao.save(friendRequest);
         }
@@ -70,12 +75,18 @@ public class FriendRequestService implements IFriendRequestService{
 
             if(dtUpdate.isEqual(friendRequest.getDtUpdate())) {
 
+                //If FriendRequest accepted create subscription
+                if(EFriendRequestStatus.get(dto.getStatus()).equals(EFriendRequestStatus.ACCEPTED)) {
+                    //Create subscription
+                    subscriptionService.create(friendRequest.getSenderUuid());
+                }
+
                 FriendRequestDTO friendRequestDTO = new FriendRequestDTO();
                 friendRequestDTO.setUuid(uuid);
                 friendRequestDTO.setDtCreate(friendRequest.getDtCreate());
                 friendRequestDTO.setDtUpdate(TimeUtil.now());
-                friendRequestDTO.setSenderUuid(friendRequest.getSender().getUuid());
-                friendRequestDTO.setReceiverUuid(friendRequest.getReceiver().getUuid());
+                friendRequestDTO.setSenderUuid(friendRequest.getSenderUuid());
+                friendRequestDTO.setReceiverUuid(friendRequest.getReceiverUuid());
                 friendRequestDTO.setStatus(EFriendRequestStatus.get(dto.getStatus()));
 
                 dao.save(mapToEntity(friendRequestDTO));
@@ -118,8 +129,8 @@ public class FriendRequestService implements IFriendRequestService{
                 .setUuid(dto.getUuid())
                 .setDtCreate(dto.getDtCreate())
                 .setDtUpdate(dto.getDtUpdate())
-                .setSender(new User(dto.getSenderUuid()))
-                .setReceiver(new User(dto.getReceiverUuid()))
+                .setSender(dto.getSenderUuid())
+                .setReceiver(dto.getReceiverUuid())
                 .setStatus(dto.getStatus())
                 .build();
     }
@@ -131,8 +142,8 @@ public class FriendRequestService implements IFriendRequestService{
         dto.setUuid(friendRequest.getUuid());
         dto.setDtCreate(friendRequest.getDtCreate());
         dto.setDtUpdate(friendRequest.getDtUpdate());
-        dto.setSender(friendRequest.getSender());
-        dto.setReceiver(friendRequest.getReceiver());
+        dto.setSender(userService.getUserByUuid(friendRequest.getSenderUuid()));
+        dto.setReceiver(userService.getUserByUuid(friendRequest.getReceiverUuid()));
         dto.setStatus(friendRequest.getStatus().name());
         return dto;
     }

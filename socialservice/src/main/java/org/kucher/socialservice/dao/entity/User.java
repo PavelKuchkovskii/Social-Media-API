@@ -3,19 +3,12 @@ package org.kucher.socialservice.dao.entity;
 
 import org.kucher.socialservice.dao.entity.api.IUser;
 
-import javax.persistence.*;
 import java.util.UUID;
 
-@Entity
-@Table(name = "user")
 public class User implements IUser {
-    @Id
     private UUID uuid;
-    @Column(name = "email", unique = true)
     private String email;
-    @Column(name = "name")
     private String name;
-    @Column(name = "surname")
     private String surname;
 
     public User() {

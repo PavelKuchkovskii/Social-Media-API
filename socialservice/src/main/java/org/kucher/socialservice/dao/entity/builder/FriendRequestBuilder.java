@@ -1,7 +1,6 @@
 package org.kucher.socialservice.dao.entity.builder;
 
 import org.kucher.socialservice.dao.entity.FriendRequest;
-import org.kucher.socialservice.dao.entity.User;
 import org.kucher.socialservice.dao.entity.enums.EFriendRequestStatus;
 
 import java.time.LocalDateTime;
@@ -12,8 +11,8 @@ public class FriendRequestBuilder {
     private UUID uuid;
     private LocalDateTime dtCreate;
     private LocalDateTime dtUpdate;
-    private User sender;
-    private User receiver;
+    private UUID senderUuid;
+    private UUID receiverUuid;
 
     private EFriendRequestStatus status;
 
@@ -39,13 +38,13 @@ public class FriendRequestBuilder {
         return this;
     }
 
-    public FriendRequestBuilder setSender(User sender) {
-        this.sender = sender;
+    public FriendRequestBuilder setSender(UUID senderUuid) {
+        this.senderUuid = senderUuid;
         return this;
     }
 
-    public FriendRequestBuilder setReceiver(User receiver) {
-        this.receiver = receiver;
+    public FriendRequestBuilder setReceiver(UUID receiverUuid) {
+        this.receiverUuid = receiverUuid;
         return this;
     }
 
@@ -55,7 +54,7 @@ public class FriendRequestBuilder {
     }
 
     public FriendRequest build() {
-        return new FriendRequest(uuid, dtCreate, dtUpdate, sender, receiver, status);
+        return new FriendRequest(uuid, dtCreate, dtUpdate, senderUuid, receiverUuid, status);
     }
 
 }

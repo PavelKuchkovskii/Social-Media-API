@@ -17,55 +17,54 @@ public class FriendRequest implements IFriendRequest {
     private LocalDateTime dtCreate;
     @Column(name = "dt_update")
     private LocalDateTime dtUpdate;
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "sender_uuid")
-    private User sender;
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "receiver_uuid")
-    private User receiver;
+    @Column(name = "sender_uuid")
+    private UUID senderUuid;
+    @Column(name = "receiver_uuid")
+    private UUID receiverUuid;
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private EFriendRequestStatus status;
 
     public FriendRequest() {
     }
-
-    public FriendRequest(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, User sender, User receiver, EFriendRequestStatus status) {
+    public FriendRequest(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, UUID senderUuid, UUID receiverUuid, EFriendRequestStatus status) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
-        this.sender = sender;
-        this.receiver = receiver;
+        this.senderUuid = senderUuid;
+        this.receiverUuid = receiverUuid;
         this.status = status;
     }
 
     @Override
     public UUID getUuid() {
-        return this.uuid;
+        return uuid;
     }
 
     @Override
     public LocalDateTime getDtCreate() {
-        return this.dtCreate;
+        return dtCreate;
     }
 
     @Override
     public LocalDateTime getDtUpdate() {
-        return this.dtUpdate;
+        return dtUpdate;
     }
 
     @Override
-    public User getSender() {
-        return this.sender;
+    public UUID getSenderUuid() {
+        return senderUuid;
     }
 
     @Override
-    public User getReceiver() {
-        return this.receiver;
+    public UUID getReceiverUuid() {
+        return receiverUuid;
     }
 
     @Override
     public EFriendRequestStatus getStatus() {
-        return this.status;
+        return status;
     }
+
+
 }

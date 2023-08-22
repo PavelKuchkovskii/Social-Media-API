@@ -8,8 +8,8 @@ import java.util.UUID;
 public interface IFriendRequest extends IEssence {
 
     UUID getUuid();
-    User getSender();
-    User getReceiver();
+    UUID getSenderUuid();
+    UUID getReceiverUuid();
 
     EFriendRequestStatus getStatus();
 }
