@@ -24,6 +24,7 @@ public class UserController {
     public ResponseEntity<UserDTO> doGetMe() {
 
         UUID uuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+
         UserDTO user = this.service.read(uuid);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }

@@ -5,7 +5,10 @@ import org.kucher.socialservice.service.dto.friendhip.ResponseFriendshipDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 
 @RestController
@@ -21,8 +24,18 @@ public class FriendshipController {
     @GetMapping
     public ResponseEntity<Page<ResponseFriendshipDTO>> doGet(@RequestParam int page, @RequestParam int size) {
 
-        Page<ResponseFriendshipDTO> responseFriendshipDTOS = this.service.read(page, size);
+        UUID uuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Page<ResponseFriendshipDTO> responseFriendshipDTOS = this.service.read(uuid, page, size);
 
         return new ResponseEntity<>(responseFriendshipDTOS, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<String> doDelete(@PathVariable("uuid")UUID uuid) {
+
+        service.delete(uuid);
+
+        return new ResponseEntity<>("Subscription has been rejected", HttpStatus.OK);
     }
 }
