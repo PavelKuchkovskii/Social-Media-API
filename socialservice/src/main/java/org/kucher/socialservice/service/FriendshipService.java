@@ -5,10 +5,16 @@ import org.kucher.socialservice.dao.entity.FriendRequest;
 import org.kucher.socialservice.dao.entity.Friendship;
 import org.kucher.socialservice.dao.entity.builder.FriendshipBuilder;
 import org.kucher.socialservice.service.dto.friendhip.FriendshipDTO;
+import org.kucher.socialservice.service.dto.friendhip.ResponseFriendshipDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class FriendshipService {
@@ -22,7 +28,7 @@ public class FriendshipService {
     }
 
     @Transactional
-    public FriendshipDTO create(FriendRequest friendRequest) {
+    public ResponseFriendshipDTO create(FriendRequest friendRequest) {
 
         FriendshipDTO friendshipDTO = new FriendshipDTO();
         friendshipDTO.setUuid(UUID.randomUUID());
@@ -35,7 +41,17 @@ public class FriendshipService {
             dao.save(friendship);
         }
 
-        return friendshipDTO;
+        ///!!!!!!!!!!!
+        return null;
+    }
+
+    public Page<ResponseFriendshipDTO> read(int page, int itemsPerPage) {
+        Pageable pageable = PageRequest.of(page, itemsPerPage);
+
+        Page<Friendship> journalFoods = dao.findAllByUserUuid(UUID.randomUUID(), pageable);
+
+        return new PageImpl<>(journalFoods.get().map(this::mapToDTO)
+                .collect(Collectors.toList()), pageable, journalFoods.getTotalElements());
     }
 
     public boolean validate(FriendshipDTO dto) {
@@ -49,5 +65,14 @@ public class FriendshipService {
                 .setUser1Uuid(dto.getUser1Uuid())
                 .setUser2Uuid(dto.getUser2Uuid())
                 .build();
+    }
+
+    public ResponseFriendshipDTO mapToDTO(Friendship entity) {
+        ResponseFriendshipDTO responseFriendshipDTO = new ResponseFriendshipDTO();
+        responseFriendshipDTO.setUuid(entity.getUuid());
+        responseFriendshipDTO.setUser1(userService.getUserByUuid(entity.getUser1Uuid()));
+        responseFriendshipDTO.setUser2(userService.getUserByUuid(entity.getUser2Uuid()));
+
+        return responseFriendshipDTO;
     }
 }

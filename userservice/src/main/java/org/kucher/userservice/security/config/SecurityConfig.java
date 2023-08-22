@@ -1,5 +1,6 @@
 package org.kucher.userservice.security.config;
 
+import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
 import org.kucher.userservice.security.auth.CustomDaoAuthenticationProvider;
 import org.kucher.userservice.security.jwt.filter.JwtFilter;
 import org.kucher.userservice.service.AuthService;
@@ -14,6 +15,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -37,6 +40,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         authenticationProvider.setPasswordEncoder(passwordEncoder);
         return authenticationProvider;
     }
+    @Bean
+    public SecretManagerServiceClient secretManagerServiceClient() throws IOException {
+        return SecretManagerServiceClient.create();
+    }
+
 
     public SecurityConfig(AuthService authService, PasswordEncoder passwordEncoder, JwtFilter filter) {
         this.passwordEncoder = passwordEncoder;
