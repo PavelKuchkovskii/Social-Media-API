@@ -3,6 +3,7 @@ package org.kucher.socialservice.service;
 import org.kucher.socialservice.dao.api.IFriendshipDao;
 import org.kucher.socialservice.dao.entity.FriendRequest;
 import org.kucher.socialservice.dao.entity.Friendship;
+import org.kucher.socialservice.dao.entity.Subscription;
 import org.kucher.socialservice.dao.entity.builder.FriendshipBuilder;
 import org.kucher.socialservice.service.dto.friendhip.FriendshipDTO;
 import org.kucher.socialservice.service.dto.friendhip.ResponseFriendshipDTO;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,13 +47,25 @@ public class FriendshipService {
         return null;
     }
 
-    public Page<ResponseFriendshipDTO> read(int page, int itemsPerPage) {
+    public Page<ResponseFriendshipDTO> read(UUID uuid, int page, int itemsPerPage) {
         Pageable pageable = PageRequest.of(page, itemsPerPage);
 
-        Page<Friendship> journalFoods = dao.findAllByUserUuid(UUID.randomUUID(), pageable);
+        Page<Friendship> friendships = dao.findAllByUserUuid(uuid, pageable);
 
-        return new PageImpl<>(journalFoods.get().map(this::mapToDTO)
-                .collect(Collectors.toList()), pageable, journalFoods.getTotalElements());
+        return new PageImpl<>(friendships.get().map(this::mapToDTO)
+                .collect(Collectors.toList()), pageable, friendships.getTotalElements());
+    }
+
+    public boolean delete(UUID uuid) {
+        Optional<Friendship> optional = dao.findById(uuid);
+
+        if(optional.isPresent()) {
+            dao.deleteById(uuid);
+            return true;
+        }
+        else {
+            throw new RuntimeException("Post not found");
+        }
     }
 
     public boolean validate(FriendshipDTO dto) {

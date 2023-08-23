@@ -1,13 +1,21 @@
 package org.kucher.socialservice.service;
 
 import org.kucher.socialservice.dao.api.ISubscriptionDao;
+import org.kucher.socialservice.dao.entity.Post;
 import org.kucher.socialservice.dao.entity.Subscription;
 import org.kucher.socialservice.dao.entity.builder.SubscriptionBuilder;
+import org.kucher.socialservice.service.dto.subscription.ResponseSubscriptionDTO;
 import org.kucher.socialservice.service.dto.subscription.SubscriptionDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class SubscriptionService {
@@ -21,11 +29,11 @@ public class SubscriptionService {
     }
 
     @Transactional
-    public SubscriptionDTO create(UUID followedUserUuid) {
+    public SubscriptionDTO create(UUID followerUuid, UUID followedUserUuid) {
 
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setUuid(UUID.randomUUID());
-        subscriptionDTO.setFollowerUuid(followedUserUuid);
+        subscriptionDTO.setFollowerUuid(followerUuid);
         subscriptionDTO.setFollowedUserUuid(followedUserUuid);
 
 
@@ -35,6 +43,37 @@ public class SubscriptionService {
         }
 
         return subscriptionDTO;
+    }
+
+    //true - followers
+    //false - followed
+    public Page<ResponseSubscriptionDTO> read(UUID uuid, boolean b, int page, int itemsPerPage) {
+        Pageable pageable = PageRequest.of(page, itemsPerPage);
+
+        Page<Subscription> subscriptions;
+
+        if(b) {
+            subscriptions = dao.findAllByFollowedUserUuid(uuid, pageable);
+        }
+        else {
+            subscriptions = dao.findAllByFollowerUuid(uuid, pageable);
+        }
+
+        return new PageImpl<>(subscriptions.get().map(this::mapToDTO)
+                .collect(Collectors.toList()), pageable, subscriptions.getTotalElements());
+    }
+
+    //Нужно проверить нет ли в друзьях и если есть, удалить из друзей
+    public boolean delete(UUID uuid) {
+        Optional<Subscription> optional = dao.findById(uuid);
+
+        if(optional.isPresent()) {
+            dao.deleteById(uuid);
+            return true;
+        }
+        else {
+            throw new RuntimeException("Post not found");
+        }
     }
 
     public boolean validate(SubscriptionDTO dto) {
@@ -48,5 +87,14 @@ public class SubscriptionService {
                 .setFollower(dto.getFollowerUuid())
                 .setFollowedUser(dto.getFollowedUserUuid())
                 .build();
+    }
+
+    public ResponseSubscriptionDTO mapToDTO(Subscription entity) {
+        ResponseSubscriptionDTO responseFriendshipDTO = new ResponseSubscriptionDTO();
+        responseFriendshipDTO.setUuid(entity.getUuid());
+        responseFriendshipDTO.setFollowerUuid(userService.getUserByUuid(entity.getFollowerUuid()));
+        responseFriendshipDTO.setFollowedUserUuid(userService.getUserByUuid(entity.getFollowedUserUuid()));
+
+        return responseFriendshipDTO;
     }
 }

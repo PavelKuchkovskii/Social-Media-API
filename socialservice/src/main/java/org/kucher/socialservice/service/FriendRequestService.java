@@ -10,12 +10,18 @@ import org.kucher.socialservice.service.dto.friendrequest.FriendRequestDTO;
 import org.kucher.socialservice.service.dto.friendrequest.CreateFriendRequestDTO;
 import org.kucher.socialservice.service.dto.friendrequest.ResponseFriendRequestDTO;
 import org.kucher.socialservice.service.dto.friendrequest.UpdateFriendRequestDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -37,18 +43,20 @@ public class FriendRequestService implements IFriendRequestService{
     @Transactional
     public ResponseFriendRequestDTO create(CreateFriendRequestDTO dto) {
 
+        UUID sender = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+
         FriendRequestDTO friendRequestDTO = new FriendRequestDTO();
         friendRequestDTO.setUuid(UUID.randomUUID());
         friendRequestDTO.setDtCreate(TimeUtil.now());
         friendRequestDTO.setDtUpdate(friendRequestDTO.getDtCreate());
-        friendRequestDTO.setSenderUuid(dto.getSenderUuid());
+        friendRequestDTO.setSenderUuid(sender);
         friendRequestDTO.setReceiverUuid(dto.getReceiverUuid());
         friendRequestDTO.setStatus(EFriendRequestStatus.WAITING);
 
         if (validate(friendRequestDTO)) {
 
             //Create subscription
-            subscriptionService.create(friendRequestDTO.getReceiverUuid());
+            subscriptionService.create(sender, friendRequestDTO.getReceiverUuid());
 
             FriendRequest friendRequest = mapToEntity(friendRequestDTO);
             dao.save(friendRequest);
@@ -67,6 +75,15 @@ public class FriendRequestService implements IFriendRequestService{
             throw new RuntimeException("FriendRequest not found");
         }
     }
+    @Override
+    public Page<ResponseFriendRequestDTO> read(UUID uuid, int page, int itemsPerPage) {
+        Pageable pageable = PageRequest.of(page, itemsPerPage);
+
+        Page<FriendRequest> friendRequests = dao.findAllByReceiverUuidAndStatus(uuid, EFriendRequestStatus.WAITING, pageable);
+
+        return new PageImpl<>(friendRequests.get().map(this::mapToDTO)
+                .collect(Collectors.toList()), pageable, friendRequests.getTotalElements());
+    }
 
     @Override
     @Transactional
@@ -80,7 +97,7 @@ public class FriendRequestService implements IFriendRequestService{
                 //If FriendRequest accepted create subscription
                 if(EFriendRequestStatus.get(dto.getStatus()).equals(EFriendRequestStatus.ACCEPTED)) {
                     //Create subscription
-                    subscriptionService.create(friendRequest.getSenderUuid());
+                    subscriptionService.create(friendRequest.getReceiverUuid(), friendRequest.getSenderUuid());
                     friendshipService.create(friendRequest);
                 }
 
@@ -97,7 +114,7 @@ public class FriendRequestService implements IFriendRequestService{
                 return read(friendRequest.getUuid());
             }
             else {
-                throw new RuntimeException("FriendRequest already update");
+                throw new RuntimeException("FriendRequest already updated");
             }
         }
         else {
@@ -115,7 +132,7 @@ public class FriendRequestService implements IFriendRequestService{
             return true;
         }
         else {
-            throw new RuntimeException("Post not found");
+            throw new RuntimeException("FriendRequest not found");
         }
     }
 
