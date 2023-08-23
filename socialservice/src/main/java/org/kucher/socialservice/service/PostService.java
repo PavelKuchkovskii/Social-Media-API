@@ -2,6 +2,7 @@ package org.kucher.socialservice.service;
 
 import org.kucher.socialservice.config.utill.Time.TimeUtil;
 import org.kucher.socialservice.dao.api.IPostDao;
+import org.kucher.socialservice.dao.entity.Friendship;
 import org.kucher.socialservice.dao.entity.Post;
 import org.kucher.socialservice.dao.entity.builder.PostBuilder;
 import org.kucher.socialservice.service.api.IPostService;
@@ -9,12 +10,18 @@ import org.kucher.socialservice.service.dto.post.PostDTO;
 import org.kucher.socialservice.service.dto.post.CreatePostDTO;
 import org.kucher.socialservice.service.dto.post.ResponsePostDTO;
 import org.kucher.socialservice.service.dto.post.UpdatePostDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService implements IPostService {
@@ -105,6 +112,21 @@ public class PostService implements IPostService {
     }
 
     @Override
+    public List<ResponsePostDTO> get(UUID uuid) {
+        return dao.findTopPostsByUserUuidOrderByDtCreateDesc(uuid).stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<ResponsePostDTO> findAllByUserUuid(UUID uuid, int page, int itemsPerPage) {
+        Pageable pageable = PageRequest.of(page, itemsPerPage);
+
+        Page<Post> posts = dao.findAllByUserUuid(uuid, pageable);
+
+        return new PageImpl<>(posts.get().map(this::mapToDTO)
+                .collect(Collectors.toList()), pageable, posts.getTotalElements());
+    }
+
+    @Override
     public boolean validate(PostDTO dto) {
         return true;
     }
@@ -137,5 +159,6 @@ public class PostService implements IPostService {
 
         return dto;
     }
+
 
 }

@@ -1,4 +1,4 @@
-package org.kucher.socialservice.controller;
+package org.kucher.socialservice.controller.api;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

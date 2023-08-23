@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -63,6 +64,21 @@ public class SubscriptionService {
                 .collect(Collectors.toList()), pageable, subscriptions.getTotalElements());
     }
 
+    //true - my followers
+    //false - followed
+    public List<ResponseSubscriptionDTO> read(UUID uuid, boolean b) {
+        List<Subscription> subscriptions;
+
+        if(b) {
+            subscriptions = dao.findAllByFollowedUserUuid(uuid);
+        }
+        else {
+            subscriptions = dao.findAllByFollowerUuid(uuid);
+        }
+
+        return subscriptions.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
     //Нужно проверить нет ли в друзьях и если есть, удалить из друзей
     public boolean delete(UUID uuid) {
         Optional<Subscription> optional = dao.findById(uuid);
@@ -92,8 +108,8 @@ public class SubscriptionService {
     public ResponseSubscriptionDTO mapToDTO(Subscription entity) {
         ResponseSubscriptionDTO responseFriendshipDTO = new ResponseSubscriptionDTO();
         responseFriendshipDTO.setUuid(entity.getUuid());
-        responseFriendshipDTO.setFollowerUuid(userService.getUserByUuid(entity.getFollowerUuid()));
-        responseFriendshipDTO.setFollowedUserUuid(userService.getUserByUuid(entity.getFollowedUserUuid()));
+        responseFriendshipDTO.setFollower(userService.getUserByUuid(entity.getFollowerUuid()));
+        responseFriendshipDTO.setFollowedUser(userService.getUserByUuid(entity.getFollowedUserUuid()));
 
         return responseFriendshipDTO;
     }

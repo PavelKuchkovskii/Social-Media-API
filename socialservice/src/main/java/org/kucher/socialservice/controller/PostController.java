@@ -1,19 +1,14 @@
 package org.kucher.socialservice.controller;
 
+import org.kucher.socialservice.controller.api.IPostController;
 import org.kucher.socialservice.service.api.IPostService;
 import org.kucher.socialservice.service.dto.post.CreatePostDTO;
 import org.kucher.socialservice.service.dto.post.ResponsePostDTO;
 import org.kucher.socialservice.service.dto.post.UpdatePostDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -42,6 +37,14 @@ public class PostController implements IPostController {
     public ResponseEntity<ResponsePostDTO> doGet(@PathVariable("uuid") UUID uuid) {
 
         ResponsePostDTO read = service.read(uuid);
+
+        return new ResponseEntity<>(read, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{uuid}")
+    public ResponseEntity<Page<ResponsePostDTO>> doGetUserPosts(@PathVariable("uuid") UUID uuid, @RequestParam("page") int page, @RequestParam("size") int size) {
+
+        Page<ResponsePostDTO> read = service.findAllByUserUuid(uuid, page, size);
 
         return new ResponseEntity<>(read, HttpStatus.OK);
     }

@@ -6,8 +6,8 @@ import java.util.UUID;
 
 public class ResponseSubscriptionDTO {
     private UUID uuid;
-    private User followerUuid;
-    private User followedUserUuid;
+    private User follower;
+    private User followedUser;
 
     public UUID getUuid() {
         return uuid;
@@ -17,19 +17,19 @@ public class ResponseSubscriptionDTO {
         this.uuid = uuid;
     }
 
-    public User getFollowerUuid() {
-        return followerUuid;
+    public User getFollower() {
+        return follower;
     }
 
-    public void setFollowerUuid(User followerUuid) {
-        this.followerUuid = followerUuid;
+    public void setFollower(User follower) {
+        this.follower = follower;
     }
 
-    public User getFollowedUserUuid() {
-        return followedUserUuid;
+    public User getFollowedUser() {
+        return followedUser;
     }
 
-    public void setFollowedUserUuid(User followedUserUuid) {
-        this.followedUserUuid = followedUserUuid;
+    public void setFollowedUser(User followedUser) {
+        this.followedUser = followedUser;
     }
 }
