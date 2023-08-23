@@ -1,7 +1,8 @@
-package org.kucher.socialservice.config;
+package org.kucher.socialservice.config.exception;
 
 import org.kucher.socialservice.config.api.Message;
 import org.kucher.socialservice.config.api.MultipleMessage;
+import org.kucher.socialservice.config.exception.api.crud.api.CrudException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
 
-    @ExceptionHandler({EntityNotFoundException.class, AccessDeniedException.class, IllegalArgumentException.class})
+    @ExceptionHandler({EntityNotFoundException.class, AccessDeniedException.class, IllegalArgumentException.class, CrudException.class})
     public ResponseEntity<Object> handleCrudException(RuntimeException ex) {
         Message error = new Message("error", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
