@@ -1,11 +1,11 @@
-package org.kucher.userservice.config.exception.api.crud;
+package org.kucher.socialservice.config.exception.api.crud;
 
 
-import org.kucher.userservice.config.exception.api.crud.api.CrudException;
+import org.kucher.socialservice.config.exception.api.crud.api.CrudException;
 
-public class UserAlreadyExistsException extends CrudException {
+public class UserAlreadySubscribeException extends CrudException {
 
-    public UserAlreadyExistsException(String message) {
+    public UserAlreadySubscribeException(String message) {
         super(message);
     }
 

@@ -1,9 +1,10 @@
 package org.kucher.socialservice.service;
 
+import org.kucher.socialservice.config.event.FriendshipAcceptedEvent;
 import org.kucher.socialservice.config.utill.Time.TimeUtil;
 import org.kucher.socialservice.dao.api.IFriendRequestDao;
 import org.kucher.socialservice.dao.entity.FriendRequest;
-import org.kucher.socialservice.dao.entity.User;
+import org.kucher.socialservice.dao.entity.Subscription;
 import org.kucher.socialservice.dao.entity.builder.FriendRequestBuilder;
 import org.kucher.socialservice.dao.entity.enums.EFriendRequestStatus;
 import org.kucher.socialservice.service.api.IFriendRequestService;
@@ -11,6 +12,8 @@ import org.kucher.socialservice.service.dto.friendrequest.FriendRequestDTO;
 import org.kucher.socialservice.service.dto.friendrequest.CreateFriendRequestDTO;
 import org.kucher.socialservice.service.dto.friendrequest.ResponseFriendRequestDTO;
 import org.kucher.socialservice.service.dto.friendrequest.UpdateFriendRequestDTO;
+import org.kucher.socialservice.service.dto.subscription.SubscriptionDTO;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,14 +34,12 @@ public class FriendRequestService implements IFriendRequestService{
 
     private final IFriendRequestDao dao;
     private final UserService userService;
-    private final SubscriptionService subscriptionService;
-    private final FriendshipService friendshipService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public FriendRequestService(IFriendRequestDao dao, UserService userService, SubscriptionService subscriptionService, FriendshipService friendshipService) {
+    public FriendRequestService(IFriendRequestDao dao, UserService userService, ApplicationEventPublisher eventPublisher) {
         this.dao = dao;
         this.userService = userService;
-        this.subscriptionService = subscriptionService;
-        this.friendshipService = friendshipService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -48,26 +49,27 @@ public class FriendRequestService implements IFriendRequestService{
         UUID sender = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
         if(!sender.equals(dto.getReceiverUuid())) {
-            User user = userService.getUserByUuid(dto.getReceiverUuid());
 
             FriendRequestDTO friendRequestDTO = new FriendRequestDTO();
             friendRequestDTO.setUuid(UUID.randomUUID());
             friendRequestDTO.setDtCreate(TimeUtil.now());
             friendRequestDTO.setDtUpdate(friendRequestDTO.getDtCreate());
             friendRequestDTO.setSenderUuid(sender);
-            friendRequestDTO.setReceiverUuid(user.getUuid());
+            friendRequestDTO.setReceiverUuid(dto.getReceiverUuid());
             friendRequestDTO.setStatus(EFriendRequestStatus.WAITING);
 
+
             if (validate(friendRequestDTO)) {
-
-                //Create subscription
-                subscriptionService.create(sender, friendRequestDTO.getReceiverUuid());
-
                 FriendRequest friendRequest = mapToEntity(friendRequestDTO);
                 dao.save(friendRequest);
+
+                return mapToDTO(friendRequest);
+            }
+            else {
+                throw new RuntimeException("Something was wrong. Try again later");
             }
 
-            return read(friendRequestDTO.getUuid());
+
         }
         else {
             throw new IllegalArgumentException("Unable to perform operation");
@@ -111,6 +113,31 @@ public class FriendRequestService implements IFriendRequestService{
     }
 
     @Override
+    public void updateFromSubscriptionService(SubscriptionDTO subscriptionDTO) {
+        Optional<FriendRequest> optional = dao.findBySenderUuidAndReceiverUuid(subscriptionDTO.getFollowedUserUuid(), subscriptionDTO.getFollowerUuid());
+
+        if(optional.isPresent()) {
+
+            ResponseFriendRequestDTO dto = mapToDTO(optional.get());
+
+            FriendRequestDTO friendRequestDTO = new FriendRequestDTO();
+            friendRequestDTO.setUuid(dto.getUuid());
+            friendRequestDTO.setDtCreate(dto.getDtCreate());
+            friendRequestDTO.setDtUpdate(TimeUtil.now());
+            friendRequestDTO.setSenderUuid(dto.getSender().getUuid());
+            friendRequestDTO.setReceiverUuid(dto.getReceiver().getUuid());
+            friendRequestDTO.setStatus(EFriendRequestStatus.ACCEPTED);
+
+            dao.save(mapToEntity(friendRequestDTO));
+        }
+        else {
+            throw new RuntimeException();
+        }
+    }
+
+
+
+    @Override
     @Transactional
     public ResponseFriendRequestDTO update(UpdateFriendRequestDTO dto, UUID uuid, LocalDateTime dtUpdate) {
         Optional<FriendRequest> optional = dao.findById(uuid);
@@ -126,8 +153,7 @@ public class FriendRequestService implements IFriendRequestService{
                     //If FriendRequest accepted create subscription
                     if (EFriendRequestStatus.get(dto.getStatus()).equals(EFriendRequestStatus.ACCEPTED)) {
                         //Create subscription
-                        subscriptionService.create(friendRequest.getReceiverUuid(), friendRequest.getSenderUuid());
-                        friendshipService.create(friendRequest);
+                        eventPublisher.publishEvent(new FriendshipAcceptedEvent(friendRequest));
                     }
 
                     FriendRequestDTO friendRequestDTO = new FriendRequestDTO();
@@ -155,7 +181,24 @@ public class FriendRequestService implements IFriendRequestService{
             throw new RuntimeException("FriendRequest not found");
         }
     }
+    @Override
+    public void deleteFromSubscriptionService(Subscription subscription) {
+        Optional<FriendRequest> request1 = dao.findBySenderUuidAndReceiverUuid(subscription.getFollowerUuid(), subscription.getFollowedUserUuid());
 
+        if(request1.isEmpty()) {
+            Optional<FriendRequest> request2 = dao.findBySenderUuidAndReceiverUuid(subscription.getFollowedUserUuid(), subscription.getFollowerUuid());
+
+            if(request2.isEmpty()) {
+                throw new RuntimeException();
+            }
+            else {
+                dao.deleteById(request2.get().getUuid());
+            }
+        }
+        else {
+            dao.deleteById(request1.get().getUuid());
+        }
+    }
     @Override
     @Transactional
     public boolean delete(UUID uuid) {

@@ -1,4 +1,4 @@
-package org.kucher.userservice.config.exception.api.crud.api;
+package org.kucher.socialservice.config.exception.api.crud.api;
 
 public class CrudException extends RuntimeException {
 

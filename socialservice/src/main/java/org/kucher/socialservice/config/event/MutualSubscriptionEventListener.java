@@ -1,22 +1,22 @@
 package org.kucher.socialservice.config.event;
 
-import org.kucher.socialservice.service.SubscriptionService;
-import org.kucher.socialservice.service.dto.subscription.CreateSubscriptionDTO;
+import org.kucher.socialservice.dao.entity.FriendRequest;
+import org.kucher.socialservice.service.FriendshipService;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FriendshipAcceptedEventListener implements ApplicationListener<FriendshipAcceptedEvent> {
+public class MutualSubscriptionEventListener implements ApplicationListener<MutualSubscriptionEvent> {
 
-    private final SubscriptionService subscriptionService;
+    private final FriendshipService friendshipService;
 
-    public FriendshipAcceptedEventListener(SubscriptionService subscriptionService) {
-        this.subscriptionService = subscriptionService;
+    public MutualSubscriptionEventListener(FriendshipService friendshipService) {
+        this.friendshipService = friendshipService;
     }
 
     @Override
-    public void onApplicationEvent(FriendshipAcceptedEvent event) {
-        //Create subscription
-        subscriptionService.create(new CreateSubscriptionDTO(event.getFriendRequest().getSenderUuid()));
+    public void onApplicationEvent(MutualSubscriptionEvent event) {
+        //Create friendship
+        friendshipService.create(new FriendRequest(event.getSubscription().getFollowerUuid(), event.getSubscription().getFollowedUserUuid()));
     }
 }

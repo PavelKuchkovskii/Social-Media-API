@@ -2,25 +2,14 @@ package org.kucher.socialservice.service.dto.subscription;
 
 import java.util.UUID;
 
-public class SubscriptionDTO {
-    private UUID uuid;
-    private UUID followerUuid;
+public class CreateSubscriptionDTO {
     private UUID followedUserUuid;
 
-    public UUID getUuid() {
-        return uuid;
+    public CreateSubscriptionDTO() {
     }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
-
-    public UUID getFollowerUuid() {
-        return followerUuid;
-    }
-
-    public void setFollowerUuid(UUID followerUuid) {
-        this.followerUuid = followerUuid;
+    public CreateSubscriptionDTO(UUID followedUserUuid) {
+        this.followedUserUuid = followedUserUuid;
     }
 
     public UUID getFollowedUserUuid() {

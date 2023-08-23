@@ -1,10 +1,17 @@
 package org.kucher.socialservice.service;
 
+import org.kucher.socialservice.config.event.MutualSubscriptionEvent;
+import org.kucher.socialservice.config.exception.api.crud.UserAlreadySubscribeException;
 import org.kucher.socialservice.dao.api.ISubscriptionDao;
+import org.kucher.socialservice.dao.entity.FriendRequest;
 import org.kucher.socialservice.dao.entity.Subscription;
+import org.kucher.socialservice.dao.entity.User;
 import org.kucher.socialservice.dao.entity.builder.SubscriptionBuilder;
+import org.kucher.socialservice.service.dto.friendrequest.CreateFriendRequestDTO;
+import org.kucher.socialservice.service.dto.subscription.CreateSubscriptionDTO;
 import org.kucher.socialservice.service.dto.subscription.ResponseSubscriptionDTO;
 import org.kucher.socialservice.service.dto.subscription.SubscriptionDTO;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -23,33 +30,85 @@ import java.util.stream.Collectors;
 public class SubscriptionService {
 
     private final ISubscriptionDao dao;
+    private final FriendRequestService friendRequestService;
+    private final FriendshipService friendshipService;
     private final UserService userService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public SubscriptionService(ISubscriptionDao dao, UserService userService) {
+    public SubscriptionService(ISubscriptionDao dao, FriendRequestService friendRequestService, FriendshipService friendshipService, UserService userService, ApplicationEventPublisher eventPublisher) {
         this.dao = dao;
+        this.friendRequestService = friendRequestService;
+        this.friendshipService = friendshipService;
         this.userService = userService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
-    public SubscriptionDTO create(UUID followerUuid, UUID followedUserUuid) {
-        if(!followerUuid.equals(followedUserUuid)) {
-            SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
-            subscriptionDTO.setUuid(UUID.randomUUID());
-            subscriptionDTO.setFollowerUuid(followerUuid);
-            subscriptionDTO.setFollowedUserUuid(followedUserUuid);
+    public ResponseSubscriptionDTO create(CreateSubscriptionDTO dto) {
 
+        UUID follower = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
-            if (validate(subscriptionDTO)) {
-                Subscription subscription = mapToEntity(subscriptionDTO);
-                dao.save(subscription);
+        if(!follower.equals(dto.getFollowedUserUuid())) {
+            User user = userService.getUserByUuid(dto.getFollowedUserUuid());
+
+            if(!dao.existsByFollowerUuidAndFollowedUserUuid(follower, user.getUuid())) {
+                SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
+                subscriptionDTO.setUuid(UUID.randomUUID());
+                subscriptionDTO.setFollowerUuid(follower);
+                subscriptionDTO.setFollowedUserUuid(user.getUuid());
+
+                if (validate(subscriptionDTO)) {
+
+                    if(!dao.existsByFollowerUuidAndFollowedUserUuid(user.getUuid(), follower)) {
+                        //Create friendRequest
+                        friendRequestService.create(new CreateFriendRequestDTO(subscriptionDTO.getFollowedUserUuid()));
+                    }
+                    else {
+                        //Create friendship
+                        eventPublisher.publishEvent(new MutualSubscriptionEvent(subscriptionDTO));
+                        friendRequestService.updateFromSubscriptionService(subscriptionDTO);
+                    }
+
+                    Subscription subscription = mapToEntity(subscriptionDTO);
+                    dao.save(subscription);
+
+                    return mapToDTO(subscription);
+                } else {
+                    throw new RuntimeException("Something was wrong. Try again later");
+                }
             }
-
-            return subscriptionDTO;
+            else {
+                throw new UserAlreadySubscribeException("Already subscribe");
+            }
         }
         else {
             throw new IllegalArgumentException("Unable to perform operation");
         }
     }
+
+    @Transactional
+    public void createFromFriendRequestService(FriendRequest friendRequest) {
+
+        SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
+        subscriptionDTO.setUuid(UUID.randomUUID());
+        subscriptionDTO.setFollowerUuid(friendRequest.getReceiverUuid());
+        subscriptionDTO.setFollowedUserUuid(friendRequest.getSenderUuid());
+
+        if (validate(subscriptionDTO)) {
+            //Create friendship
+            eventPublisher.publishEvent(new MutualSubscriptionEvent(subscriptionDTO));
+
+            Subscription subscription = mapToEntity(subscriptionDTO);
+            dao.save(subscription);
+
+            mapToDTO(subscription);
+        }
+        else {
+            throw new RuntimeException("Something was wrong. Try again later");
+        }
+
+    }
+
 
     //true - my followers
     //false - followed
@@ -84,7 +143,6 @@ public class SubscriptionService {
         return subscriptions.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
-    //Нужно проверить нет ли в друзьях и если есть, удалить из друзей
     public boolean delete(UUID uuid) {
 
         Optional<Subscription> optional = dao.findById(uuid);
@@ -93,6 +151,12 @@ public class SubscriptionService {
             UUID muuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
             if(muuid.equals(optional.get().getFollowerUuid())) {
+
+                //Delete friendship
+                friendshipService.delete(optional.get());
+
+                //Delete friendRequest
+                friendRequestService.deleteFromSubscriptionService(optional.get());
                 dao.deleteById(uuid);
                 return true;
             }

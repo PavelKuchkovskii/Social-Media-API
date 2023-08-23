@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ISubscriptionDao extends JpaRepository<Subscription, UUID> {
@@ -14,4 +15,5 @@ public interface ISubscriptionDao extends JpaRepository<Subscription, UUID> {
     Page<Subscription> findAllByFollowedUserUuid(UUID uuid, Pageable pageable);
     List<Subscription> findAllByFollowerUuid(UUID uuid);
     List<Subscription> findAllByFollowedUserUuid(UUID uuid);
+    boolean existsByFollowerUuidAndFollowedUserUuid(UUID followerUuid, UUID followedUserUuid);
 }

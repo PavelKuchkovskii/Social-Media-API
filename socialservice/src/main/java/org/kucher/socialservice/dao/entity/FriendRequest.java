@@ -27,6 +27,12 @@ public class FriendRequest implements IFriendRequest {
 
     public FriendRequest() {
     }
+
+    public FriendRequest(UUID senderUuid, UUID receiverUuid) {
+        this.senderUuid = senderUuid;
+        this.receiverUuid = receiverUuid;
+    }
+
     public FriendRequest(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, UUID senderUuid, UUID receiverUuid, EFriendRequestStatus status) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;

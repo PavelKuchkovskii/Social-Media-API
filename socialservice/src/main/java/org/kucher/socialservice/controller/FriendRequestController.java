@@ -1,7 +1,6 @@
 package org.kucher.socialservice.controller;
 
 import org.kucher.socialservice.service.FriendRequestService;
-import org.kucher.socialservice.service.dto.friendrequest.CreateFriendRequestDTO;
 import org.kucher.socialservice.service.dto.friendrequest.ResponseFriendRequestDTO;
 import org.kucher.socialservice.service.dto.friendrequest.UpdateFriendRequestDTO;
 import org.springframework.data.domain.Page;
@@ -21,14 +20,6 @@ public class FriendRequestController {
 
     public FriendRequestController(FriendRequestService service) {
         this.service = service;
-    }
-
-    @PostMapping
-    public ResponseEntity<ResponseFriendRequestDTO> sendFriendRequest(@RequestBody CreateFriendRequestDTO dto) {
-
-        ResponseFriendRequestDTO created = service.create(dto);
-
-        return new ResponseEntity<>(created, HttpStatus.OK);
     }
 
     @PatchMapping("/{uuid}/dt_update/{dt_update}")

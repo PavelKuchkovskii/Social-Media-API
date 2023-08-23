@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "subscription")
+@Table(name = "subscription", uniqueConstraints = @UniqueConstraint(columnNames = {"follower_uuid", "followedUser_uuid"}))
 public class Subscription implements ISubscription {
 
     @Id

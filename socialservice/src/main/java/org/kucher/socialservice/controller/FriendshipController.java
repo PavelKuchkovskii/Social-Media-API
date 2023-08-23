@@ -30,12 +30,4 @@ public class FriendshipController {
 
         return new ResponseEntity<>(responseFriendshipDTOS, HttpStatus.OK);
     }
-
-    @DeleteMapping("/{uuid}")
-    public ResponseEntity<String> deleteFriend(@PathVariable("uuid")UUID uuid) {
-
-        service.delete(uuid);
-
-        return new ResponseEntity<>("Subscription has been rejected", HttpStatus.OK);
-    }
 }

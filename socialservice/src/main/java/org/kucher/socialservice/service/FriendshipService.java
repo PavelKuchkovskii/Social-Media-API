@@ -3,6 +3,7 @@ package org.kucher.socialservice.service;
 import org.kucher.socialservice.dao.api.IFriendshipDao;
 import org.kucher.socialservice.dao.entity.FriendRequest;
 import org.kucher.socialservice.dao.entity.Friendship;
+import org.kucher.socialservice.dao.entity.Subscription;
 import org.kucher.socialservice.dao.entity.builder.FriendshipBuilder;
 import org.kucher.socialservice.service.dto.friendhip.FriendshipDTO;
 import org.kucher.socialservice.service.dto.friendhip.ResponseFriendshipDTO;
@@ -82,6 +83,19 @@ public class FriendshipService {
         }
         else {
             throw new RuntimeException("Friendship not found");
+        }
+    }
+
+    public void delete(Subscription subscription) {
+        Optional<Friendship> request1 = dao.findByUser1UuidAndUser2Uuid(subscription.getFollowerUuid(), subscription.getFollowedUserUuid());
+
+        if(request1.isEmpty()) {
+            Optional<Friendship> request2 = dao.findByUser1UuidAndUser2Uuid(subscription.getFollowedUserUuid(), subscription.getFollowerUuid());
+
+            request2.ifPresent(friendship -> dao.deleteById(friendship.getUuid()));
+        }
+        else {
+            dao.deleteById(request1.get().getUuid());
         }
     }
 

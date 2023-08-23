@@ -1,6 +1,7 @@
 package org.kucher.socialservice.controller;
 
 import org.kucher.socialservice.service.SubscriptionService;
+import org.kucher.socialservice.service.dto.subscription.CreateSubscriptionDTO;
 import org.kucher.socialservice.service.dto.subscription.ResponseSubscriptionDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,14 @@ public class SubscriptionController {
 
     public SubscriptionController(SubscriptionService service) {
         this.service = service;
+    }
+
+    @PostMapping
+    public ResponseEntity<ResponseSubscriptionDTO> createSubscription(@RequestBody CreateSubscriptionDTO dto) {
+
+        ResponseSubscriptionDTO created = service.create(dto);
+
+        return new ResponseEntity<>(created, HttpStatus.OK);
     }
 
     @GetMapping("/follower")

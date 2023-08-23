@@ -1,14 +1,14 @@
 package org.kucher.socialservice.config.event;
 
-import org.kucher.socialservice.dao.entity.FriendRequest;
+import org.kucher.socialservice.service.dto.subscription.SubscriptionDTO;
 import org.springframework.context.ApplicationEvent;
 
-public class FriendshipAcceptedEvent extends ApplicationEvent {
-    public FriendshipAcceptedEvent(FriendRequest friendRequest) {
-        super(friendRequest);
+public class MutualSubscriptionEvent extends ApplicationEvent {
+    public MutualSubscriptionEvent(SubscriptionDTO subscriptionDTO) {
+        super(subscriptionDTO);
     }
 
-    public FriendRequest getFriendRequest() {
-        return (FriendRequest) getSource();
+    public SubscriptionDTO getSubscription() {
+        return (SubscriptionDTO) getSource();
     }
 }
