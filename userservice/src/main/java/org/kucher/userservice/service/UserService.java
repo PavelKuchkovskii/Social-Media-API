@@ -15,7 +15,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ServerErrorException;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,8 +57,12 @@ public class UserService {
             User user = mapToEntity(userDTO);
             dao.save(user);
         }
-
-        return this.read(userDTO.getUuid());
+        try {
+            return this.read(userDTO.getUuid());
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Something was wrong. Try again later");
+        }
     }
 
     @Transactional
@@ -110,7 +116,12 @@ public class UserService {
                 dao.save(user);
             }
 
-            return this.read(userDTO.getUuid());
+            try {
+                return this.read(userDTO.getUuid());
+            }
+            catch (Exception e) {
+                throw new RuntimeException("Something was wrong. Try again later");
+            }
         }
         else {
             throw new UserAlreadyUpdatedException("User already updated");
@@ -121,8 +132,7 @@ public class UserService {
         Optional<User> user = dao.findById(uuid);
 
         if(user.isEmpty()) {
-            //другая ошибка должна быть
-            throw new RuntimeException("Something wrong");
+            throw new EntityNotFoundException("User not found exception");
         }
 
         return this.mapToDTO(user.get());

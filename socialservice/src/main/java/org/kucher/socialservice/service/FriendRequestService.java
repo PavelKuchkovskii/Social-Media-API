@@ -3,6 +3,7 @@ package org.kucher.socialservice.service;
 import org.kucher.socialservice.config.utill.Time.TimeUtil;
 import org.kucher.socialservice.dao.api.IFriendRequestDao;
 import org.kucher.socialservice.dao.entity.FriendRequest;
+import org.kucher.socialservice.dao.entity.User;
 import org.kucher.socialservice.dao.entity.builder.FriendRequestBuilder;
 import org.kucher.socialservice.dao.entity.enums.EFriendRequestStatus;
 import org.kucher.socialservice.service.api.IFriendRequestService;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,31 +47,46 @@ public class FriendRequestService implements IFriendRequestService{
 
         UUID sender = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        FriendRequestDTO friendRequestDTO = new FriendRequestDTO();
-        friendRequestDTO.setUuid(UUID.randomUUID());
-        friendRequestDTO.setDtCreate(TimeUtil.now());
-        friendRequestDTO.setDtUpdate(friendRequestDTO.getDtCreate());
-        friendRequestDTO.setSenderUuid(sender);
-        friendRequestDTO.setReceiverUuid(dto.getReceiverUuid());
-        friendRequestDTO.setStatus(EFriendRequestStatus.WAITING);
+        if(!sender.equals(dto.getReceiverUuid())) {
+            User user = userService.getUserByUuid(dto.getReceiverUuid());
 
-        if (validate(friendRequestDTO)) {
+            FriendRequestDTO friendRequestDTO = new FriendRequestDTO();
+            friendRequestDTO.setUuid(UUID.randomUUID());
+            friendRequestDTO.setDtCreate(TimeUtil.now());
+            friendRequestDTO.setDtUpdate(friendRequestDTO.getDtCreate());
+            friendRequestDTO.setSenderUuid(sender);
+            friendRequestDTO.setReceiverUuid(user.getUuid());
+            friendRequestDTO.setStatus(EFriendRequestStatus.WAITING);
 
-            //Create subscription
-            subscriptionService.create(sender, friendRequestDTO.getReceiverUuid());
+            if (validate(friendRequestDTO)) {
 
-            FriendRequest friendRequest = mapToEntity(friendRequestDTO);
-            dao.save(friendRequest);
+                //Create subscription
+                subscriptionService.create(sender, friendRequestDTO.getReceiverUuid());
+
+                FriendRequest friendRequest = mapToEntity(friendRequestDTO);
+                dao.save(friendRequest);
+            }
+
+            return read(friendRequestDTO.getUuid());
         }
-
-        return read(friendRequestDTO.getUuid());
+        else {
+            throw new IllegalArgumentException("Unable to perform operation");
+        }
     }
 
     @Override
     public ResponseFriendRequestDTO read(UUID uuid) {
+        UUID muuid= UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+
         Optional<FriendRequest> optional = dao.findById(uuid);
         if(optional.isPresent()) {
-            return mapToDTO(optional.get());
+            if(muuid.equals(optional.get().getSenderUuid()) || muuid.equals(optional.get().getReceiverUuid())) {
+
+                return mapToDTO(optional.get());
+            }
+            else {
+                throw new AccessDeniedException("Access denied");
+            }
         }
         else {
             throw new RuntimeException("FriendRequest not found");
@@ -77,12 +94,20 @@ public class FriendRequestService implements IFriendRequestService{
     }
     @Override
     public Page<ResponseFriendRequestDTO> read(UUID uuid, int page, int itemsPerPage) {
-        Pageable pageable = PageRequest.of(page, itemsPerPage);
+        UUID muuid= UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        Page<FriendRequest> friendRequests = dao.findAllByReceiverUuidAndStatus(uuid, EFriendRequestStatus.WAITING, pageable);
+        if(uuid.equals(muuid)) {
 
-        return new PageImpl<>(friendRequests.get().map(this::mapToDTO)
-                .collect(Collectors.toList()), pageable, friendRequests.getTotalElements());
+            Pageable pageable = PageRequest.of(page, itemsPerPage);
+
+            Page<FriendRequest> friendRequests = dao.findAllByReceiverUuidAndStatus(uuid, EFriendRequestStatus.WAITING, pageable);
+
+            return new PageImpl<>(friendRequests.get().map(this::mapToDTO)
+                    .collect(Collectors.toList()), pageable, friendRequests.getTotalElements());
+        }
+        else {
+            throw new AccessDeniedException("Access denied");
+        }
     }
 
     @Override
@@ -92,30 +117,39 @@ public class FriendRequestService implements IFriendRequestService{
         if(optional.isPresent()) {
             FriendRequest friendRequest = optional.get();
 
-            if(dtUpdate.isEqual(friendRequest.getDtUpdate())) {
+            UUID muuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
-                //If FriendRequest accepted create subscription
-                if(EFriendRequestStatus.get(dto.getStatus()).equals(EFriendRequestStatus.ACCEPTED)) {
-                    //Create subscription
-                    subscriptionService.create(friendRequest.getReceiverUuid(), friendRequest.getSenderUuid());
-                    friendshipService.create(friendRequest);
+            if(muuid.equals(friendRequest.getReceiverUuid())) {
+
+                if (dtUpdate.isEqual(friendRequest.getDtUpdate())) {
+
+                    //If FriendRequest accepted create subscription
+                    if (EFriendRequestStatus.get(dto.getStatus()).equals(EFriendRequestStatus.ACCEPTED)) {
+                        //Create subscription
+                        subscriptionService.create(friendRequest.getReceiverUuid(), friendRequest.getSenderUuid());
+                        friendshipService.create(friendRequest);
+                    }
+
+                    FriendRequestDTO friendRequestDTO = new FriendRequestDTO();
+                    friendRequestDTO.setUuid(uuid);
+                    friendRequestDTO.setDtCreate(friendRequest.getDtCreate());
+                    friendRequestDTO.setDtUpdate(TimeUtil.now());
+                    friendRequestDTO.setSenderUuid(friendRequest.getSenderUuid());
+                    friendRequestDTO.setReceiverUuid(friendRequest.getReceiverUuid());
+                    friendRequestDTO.setStatus(EFriendRequestStatus.get(dto.getStatus()));
+
+                    dao.save(mapToEntity(friendRequestDTO));
+
+                    return read(friendRequest.getUuid());
                 }
-
-                FriendRequestDTO friendRequestDTO = new FriendRequestDTO();
-                friendRequestDTO.setUuid(uuid);
-                friendRequestDTO.setDtCreate(friendRequest.getDtCreate());
-                friendRequestDTO.setDtUpdate(TimeUtil.now());
-                friendRequestDTO.setSenderUuid(friendRequest.getSenderUuid());
-                friendRequestDTO.setReceiverUuid(friendRequest.getReceiverUuid());
-                friendRequestDTO.setStatus(EFriendRequestStatus.get(dto.getStatus()));
-
-                dao.save(mapToEntity(friendRequestDTO));
-
-                return read(friendRequest.getUuid());
+                else {
+                    throw new RuntimeException("FriendRequest already updated");
+                }
             }
             else {
-                throw new RuntimeException("FriendRequest already updated");
+                throw new AccessDeniedException("Access denied");
             }
+
         }
         else {
             throw new RuntimeException("FriendRequest not found");
@@ -128,11 +162,19 @@ public class FriendRequestService implements IFriendRequestService{
         Optional<FriendRequest> optional = dao.findById(uuid);
 
         if(optional.isPresent()) {
-            dao.deleteById(uuid);
-            return true;
+
+            UUID userUuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+
+            if(userUuid.equals(optional.get().getSenderUuid())) {
+                dao.deleteById(uuid);
+                return true;
+            }
+            else {
+                throw new AccessDeniedException("Access denied");
+            }
         }
         else {
-            throw new RuntimeException("FriendRequest not found");
+            throw new RuntimeException("Post not found");
         }
     }
 

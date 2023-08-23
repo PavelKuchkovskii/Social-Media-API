@@ -3,7 +3,6 @@ package org.kucher.socialservice.service;
 import org.kucher.socialservice.dao.api.IFriendshipDao;
 import org.kucher.socialservice.dao.entity.FriendRequest;
 import org.kucher.socialservice.dao.entity.Friendship;
-import org.kucher.socialservice.dao.entity.Subscription;
 import org.kucher.socialservice.dao.entity.builder.FriendshipBuilder;
 import org.kucher.socialservice.service.dto.friendhip.FriendshipDTO;
 import org.kucher.socialservice.service.dto.friendhip.ResponseFriendshipDTO;
@@ -11,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,24 +31,32 @@ public class FriendshipService {
     }
 
     @Transactional
-    public ResponseFriendshipDTO create(FriendRequest friendRequest) {
+    public boolean create(FriendRequest friendRequest) {
+        UUID muuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        FriendshipDTO friendshipDTO = new FriendshipDTO();
-        friendshipDTO.setUuid(UUID.randomUUID());
-        friendshipDTO.setUser1Uuid(friendRequest.getSenderUuid());
-        friendshipDTO.setUser2Uuid(friendRequest.getReceiverUuid());
+        if(!friendRequest.getSenderUuid().equals(friendRequest.getReceiverUuid())
+                && (muuid.equals(friendRequest.getSenderUuid()) || muuid.equals(friendRequest.getReceiverUuid()) )) {
+
+            FriendshipDTO friendshipDTO = new FriendshipDTO();
+            friendshipDTO.setUuid(UUID.randomUUID());
+            friendshipDTO.setUser1Uuid(friendRequest.getSenderUuid());
+            friendshipDTO.setUser2Uuid(friendRequest.getReceiverUuid());
 
 
-        if (validate(friendshipDTO)) {
-            Friendship friendship = mapToEntity(friendshipDTO);
-            dao.save(friendship);
+            if (validate(friendshipDTO)) {
+                Friendship friendship = mapToEntity(friendshipDTO);
+                dao.save(friendship);
+            }
+
+            return true;
         }
-
-        ///!!!!!!!!!!!
-        return null;
+        else {
+            throw new IllegalArgumentException("Unable to perform operation");
+        }
     }
 
     public Page<ResponseFriendshipDTO> read(UUID uuid, int page, int itemsPerPage) {
+
         Pageable pageable = PageRequest.of(page, itemsPerPage);
 
         Page<Friendship> friendships = dao.findAllByUserUuid(uuid, pageable);
@@ -60,11 +69,19 @@ public class FriendshipService {
         Optional<Friendship> optional = dao.findById(uuid);
 
         if(optional.isPresent()) {
-            dao.deleteById(uuid);
-            return true;
+
+            UUID muuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+
+            if(muuid.equals(optional.get().getUser1Uuid()) || muuid.equals(optional.get().getUser2Uuid()) ) {
+                dao.deleteById(uuid);
+                return true;
+            }
+            else {
+                throw new AccessDeniedException("Access denied");
+            }
         }
         else {
-            throw new RuntimeException("Post not found");
+            throw new RuntimeException("Friendship not found");
         }
     }
 

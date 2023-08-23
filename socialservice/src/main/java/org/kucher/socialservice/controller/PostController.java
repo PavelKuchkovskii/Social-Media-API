@@ -25,7 +25,7 @@ public class PostController implements IPostController {
 
     @Override
     @PostMapping
-    public ResponseEntity<ResponsePostDTO> doPost(@RequestBody CreatePostDTO dto) {
+    public ResponseEntity<ResponsePostDTO> createPost(@RequestBody CreatePostDTO dto) {
 
         ResponsePostDTO created = service.create(dto);
 
@@ -34,7 +34,7 @@ public class PostController implements IPostController {
 
     @Override
     @GetMapping("/{uuid}")
-    public ResponseEntity<ResponsePostDTO> doGet(@PathVariable("uuid") UUID uuid) {
+    public ResponseEntity<ResponsePostDTO> getPostByUuid(@PathVariable("uuid") UUID uuid) {
 
         ResponsePostDTO read = service.read(uuid);
 
@@ -42,7 +42,7 @@ public class PostController implements IPostController {
     }
 
     @GetMapping("/user/{uuid}")
-    public ResponseEntity<Page<ResponsePostDTO>> doGetUserPosts(@PathVariable("uuid") UUID uuid, @RequestParam("page") int page, @RequestParam("size") int size) {
+    public ResponseEntity<Page<ResponsePostDTO>> getAllPostByUserUuid(@PathVariable("uuid") UUID uuid, @RequestParam("page") int page, @RequestParam("size") int size) {
 
         Page<ResponsePostDTO> read = service.findAllByUserUuid(uuid, page, size);
 
@@ -51,7 +51,7 @@ public class PostController implements IPostController {
 
     @Override
     @PatchMapping("/{uuid}/dt_update/{dt_update}")
-    public ResponseEntity<ResponsePostDTO> doUpdate(@RequestBody UpdatePostDTO dto, @PathVariable("uuid") UUID uuid, @PathVariable("dt_update") LocalDateTime dtUpdate) {
+    public ResponseEntity<ResponsePostDTO> updatePost(@RequestBody UpdatePostDTO dto, @PathVariable("uuid") UUID uuid, @PathVariable("dt_update") LocalDateTime dtUpdate) {
 
         ResponsePostDTO created = service.update(dto, uuid, dtUpdate);
 
@@ -60,7 +60,7 @@ public class PostController implements IPostController {
 
     @Override
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<String> doDelete(@PathVariable("uuid") UUID uuid) {
+    public ResponseEntity<String> deletePost(@PathVariable("uuid") UUID uuid) {
 
         service.delete(uuid);
 

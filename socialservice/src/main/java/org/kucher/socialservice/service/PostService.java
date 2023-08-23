@@ -2,8 +2,8 @@ package org.kucher.socialservice.service;
 
 import org.kucher.socialservice.config.utill.Time.TimeUtil;
 import org.kucher.socialservice.dao.api.IPostDao;
-import org.kucher.socialservice.dao.entity.Friendship;
 import org.kucher.socialservice.dao.entity.Post;
+import org.kucher.socialservice.dao.entity.User;
 import org.kucher.socialservice.dao.entity.builder.PostBuilder;
 import org.kucher.socialservice.service.api.IPostService;
 import org.kucher.socialservice.service.dto.post.PostDTO;
@@ -14,7 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -24,6 +27,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class PostService implements IPostService {
     private final IPostDao dao;
     private final UserService userService;
@@ -33,16 +37,17 @@ public class PostService implements IPostService {
         this.userService = userService;
     }
 
-
-    //Нужно проверить есть ли такой юзер
     @Override
+    @Transactional
     public ResponsePostDTO create(CreatePostDTO dto) {
+
+        User user = userService.getUserByUuid(dto.getUserUuid());
 
         PostDTO postDTO = new PostDTO();
         postDTO.setUuid(UUID.randomUUID());
         postDTO.setDtCreate(TimeUtil.now());
         postDTO.setDtUpdate(postDTO.getDtCreate());
-        postDTO.setUserUuid(dto.getUserUuid());
+        postDTO.setUserUuid(user.getUuid());
         postDTO.setText(dto.getText());
         postDTO.setTitle(dto.getTitle());
         postDTO.setImageBase64(dto.getImageBase64());
@@ -68,28 +73,38 @@ public class PostService implements IPostService {
     }
 
     @Override
+    @Transactional
     public ResponsePostDTO update(UpdatePostDTO dto, UUID uuid, LocalDateTime dtUpdate) {
         Optional<Post> optional = dao.findById(uuid);
+
         if(optional.isPresent()) {
             Post post = optional.get();
 
-            if(dtUpdate.isEqual(post.getDtUpdate())) {
+            UUID userUuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
-                PostDTO postDTO = new PostDTO();
-                postDTO.setUuid(uuid);
-                postDTO.setDtCreate(post.getDtCreate());
-                postDTO.setDtUpdate(TimeUtil.now());
-                postDTO.setUserUuid(post.getUserUuid());
-                postDTO.setText(dto.getText());
-                postDTO.setTitle(dto.getTitle());
-                postDTO.setImageBase64(dto.getImageBase64());
+            if(userUuid.equals(post.getUserUuid())) {
 
-                dao.save(mapToEntity(postDTO));
+                if (dtUpdate.isEqual(post.getDtUpdate())) {
 
-                return read(post.getUuid());
+                    PostDTO postDTO = new PostDTO();
+                    postDTO.setUuid(uuid);
+                    postDTO.setDtCreate(post.getDtCreate());
+                    postDTO.setDtUpdate(TimeUtil.now());
+                    postDTO.setUserUuid(post.getUserUuid());
+                    postDTO.setText(dto.getText());
+                    postDTO.setTitle(dto.getTitle());
+                    postDTO.setImageBase64(dto.getImageBase64());
+
+                    dao.save(mapToEntity(postDTO));
+
+                    return read(post.getUuid());
+                }
+                else {
+                    throw new RuntimeException("Post already update");
+                }
             }
             else {
-                throw new RuntimeException("Post already update");
+                throw new AccessDeniedException("Access denied");
             }
         }
         else {
@@ -99,12 +114,21 @@ public class PostService implements IPostService {
     }
 
     @Override
+    @Transactional
     public boolean delete(UUID uuid) {
         Optional<Post> optional = dao.findById(uuid);
 
         if(optional.isPresent()) {
-            dao.deleteById(uuid);
-            return true;
+
+            UUID userUuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+
+            if(userUuid.equals(optional.get().getUserUuid())) {
+                dao.deleteById(uuid);
+                return true;
+            }
+            else {
+                throw new AccessDeniedException("Access denied");
+            }
         }
         else {
             throw new RuntimeException("Post not found");

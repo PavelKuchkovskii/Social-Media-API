@@ -1,7 +1,6 @@
 package org.kucher.socialservice.controller;
 
 import org.kucher.socialservice.service.FeedService;
-import org.kucher.socialservice.service.dto.post.PostDTO;
 import org.kucher.socialservice.service.dto.post.ResponsePostDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -33,7 +32,7 @@ public class FeedController {
 
         UUID uuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        Page<ResponsePostDTO> postDTOS = this.service.read(uuid, page, size);
+        Page<ResponsePostDTO> postDTOS = this.service.read(uuid, page, size, sort);
 
         return new ResponseEntity<>(postDTOS, HttpStatus.OK);
     }

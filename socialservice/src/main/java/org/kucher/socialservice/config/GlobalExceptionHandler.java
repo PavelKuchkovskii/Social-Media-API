@@ -1,14 +1,11 @@
-package org.kucher.userservice.config.exception;
+package org.kucher.socialservice.config;
 
-
-import org.kucher.userservice.config.api.Message;
-import org.kucher.userservice.config.api.MultipleMessage;
-import org.kucher.userservice.config.exception.api.crud.api.CrudException;
-import org.kucher.userservice.config.exception.api.registration.api.RegistrationException;
+import org.kucher.socialservice.config.api.Message;
+import org.kucher.socialservice.config.api.MultipleMessage;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -30,13 +27,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({AuthenticationException.class, RegistrationException.class})
-    public ResponseEntity<Object> handleAuthException(RuntimeException ex) {
-        Message error = new Message("error", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
-    }
 
-    @ExceptionHandler({CrudException.class, IllegalArgumentException.class, EntityNotFoundException.class})
+    @ExceptionHandler({EntityNotFoundException.class, AccessDeniedException.class, IllegalArgumentException.class})
     public ResponseEntity<Object> handleCrudException(RuntimeException ex) {
         Message error = new Message("error", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);

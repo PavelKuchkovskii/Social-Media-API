@@ -27,7 +27,7 @@ public interface IPostController {
             produces = {"text/plain"},
             consumes = {"application/json"},
             method = RequestMethod.POST)
-    ResponseEntity<ResponsePostDTO> doPost(
+    ResponseEntity<ResponsePostDTO> createPost(
             @ApiParam(
                     value = "A JSON value representing a post.",
                     example = "{foo: whatever, bar: whatever2}")
@@ -41,7 +41,7 @@ public interface IPostController {
             produces = {"text/plain"},
             consumes = {"application/json"},
             method = RequestMethod.GET)
-    ResponseEntity<ResponsePostDTO> doGet(
+    ResponseEntity<ResponsePostDTO> getPostByUuid(
             @ApiParam(
                     value = "A UUID value representing a saved post.",
                     example = "{foo: whatever, bar: whatever2}")
@@ -54,7 +54,7 @@ public interface IPostController {
             produces = {"text/plain"},
             consumes = {"application/json"},
             method = RequestMethod.PATCH)
-    ResponseEntity<ResponsePostDTO> doUpdate(
+    ResponseEntity<ResponsePostDTO> updatePost(
             @ApiParam(
                     value = "A UUID value representing a saved post.",
                     example = "{foo: whatever, bar: whatever2}")
@@ -71,7 +71,7 @@ public interface IPostController {
             produces = {"text/plain"},
             consumes = {"application/json"},
             method = RequestMethod.DELETE)
-    ResponseEntity<String> doDelete(@ApiParam(
+    ResponseEntity<String> deletePost(@ApiParam(
             value = "A UUID value representing a saved post.",
             example = "{foo: whatever, bar: whatever2}")
                                     @PathVariable("uuid") UUID uuid);

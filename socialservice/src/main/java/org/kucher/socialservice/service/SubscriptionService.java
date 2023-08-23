@@ -1,7 +1,6 @@
 package org.kucher.socialservice.service;
 
 import org.kucher.socialservice.dao.api.ISubscriptionDao;
-import org.kucher.socialservice.dao.entity.Post;
 import org.kucher.socialservice.dao.entity.Subscription;
 import org.kucher.socialservice.dao.entity.builder.SubscriptionBuilder;
 import org.kucher.socialservice.service.dto.subscription.ResponseSubscriptionDTO;
@@ -10,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,32 +32,36 @@ public class SubscriptionService {
 
     @Transactional
     public SubscriptionDTO create(UUID followerUuid, UUID followedUserUuid) {
+        if(!followerUuid.equals(followedUserUuid)) {
+            SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
+            subscriptionDTO.setUuid(UUID.randomUUID());
+            subscriptionDTO.setFollowerUuid(followerUuid);
+            subscriptionDTO.setFollowedUserUuid(followedUserUuid);
 
-        SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
-        subscriptionDTO.setUuid(UUID.randomUUID());
-        subscriptionDTO.setFollowerUuid(followerUuid);
-        subscriptionDTO.setFollowedUserUuid(followedUserUuid);
 
+            if (validate(subscriptionDTO)) {
+                Subscription subscription = mapToEntity(subscriptionDTO);
+                dao.save(subscription);
+            }
 
-        if (validate(subscriptionDTO)) {
-            Subscription subscription = mapToEntity(subscriptionDTO);
-            dao.save(subscription);
+            return subscriptionDTO;
         }
-
-        return subscriptionDTO;
+        else {
+            throw new IllegalArgumentException("Unable to perform operation");
+        }
     }
 
-    //true - followers
+    //true - my followers
     //false - followed
     public Page<ResponseSubscriptionDTO> read(UUID uuid, boolean b, int page, int itemsPerPage) {
+
         Pageable pageable = PageRequest.of(page, itemsPerPage);
 
         Page<Subscription> subscriptions;
 
-        if(b) {
+        if (b) {
             subscriptions = dao.findAllByFollowedUserUuid(uuid, pageable);
-        }
-        else {
+        } else {
             subscriptions = dao.findAllByFollowerUuid(uuid, pageable);
         }
 
@@ -67,12 +72,12 @@ public class SubscriptionService {
     //true - my followers
     //false - followed
     public List<ResponseSubscriptionDTO> read(UUID uuid, boolean b) {
+
         List<Subscription> subscriptions;
 
-        if(b) {
+        if (b) {
             subscriptions = dao.findAllByFollowedUserUuid(uuid);
-        }
-        else {
+        } else {
             subscriptions = dao.findAllByFollowerUuid(uuid);
         }
 
@@ -81,11 +86,19 @@ public class SubscriptionService {
 
     //Нужно проверить нет ли в друзьях и если есть, удалить из друзей
     public boolean delete(UUID uuid) {
+
         Optional<Subscription> optional = dao.findById(uuid);
 
         if(optional.isPresent()) {
-            dao.deleteById(uuid);
-            return true;
+            UUID muuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+
+            if(muuid.equals(optional.get().getFollowerUuid())) {
+                dao.deleteById(uuid);
+                return true;
+            }
+            else {
+                throw new AccessDeniedException("Access denied");
+            }
         }
         else {
             throw new RuntimeException("Post not found");

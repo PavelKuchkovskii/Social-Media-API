@@ -24,7 +24,7 @@ public class FriendRequestController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseFriendRequestDTO> doPost(@RequestBody CreateFriendRequestDTO dto) {
+    public ResponseEntity<ResponseFriendRequestDTO> sendFriendRequest(@RequestBody CreateFriendRequestDTO dto) {
 
         ResponseFriendRequestDTO created = service.create(dto);
 

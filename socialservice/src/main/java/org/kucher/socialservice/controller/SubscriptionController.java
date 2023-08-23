@@ -21,7 +21,7 @@ public class SubscriptionController {
     }
 
     @GetMapping("/follower")
-    public ResponseEntity<Page<ResponseSubscriptionDTO>> doGetFollowers(@RequestParam int page, @RequestParam int size) {
+    public ResponseEntity<Page<ResponseSubscriptionDTO>> getFollowers(@RequestParam int page, @RequestParam int size) {
 
         UUID uuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -31,7 +31,7 @@ public class SubscriptionController {
     }
 
     @GetMapping("/followed")
-    public ResponseEntity<Page<ResponseSubscriptionDTO>> doGetFollowed(@RequestParam int page, @RequestParam int size) {
+    public ResponseEntity<Page<ResponseSubscriptionDTO>> getFollowedUsers(@RequestParam int page, @RequestParam int size) {
 
         UUID uuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 

@@ -22,7 +22,7 @@ public class FriendshipController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ResponseFriendshipDTO>> doGet(@RequestParam int page, @RequestParam int size) {
+    public ResponseEntity<Page<ResponseFriendshipDTO>> getFriends(@RequestParam int page, @RequestParam int size) {
 
         UUID uuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -32,7 +32,7 @@ public class FriendshipController {
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<String> doDelete(@PathVariable("uuid")UUID uuid) {
+    public ResponseEntity<String> deleteFriend(@PathVariable("uuid")UUID uuid) {
 
         service.delete(uuid);
 

@@ -2,10 +2,9 @@ package org.kucher.socialservice.service;
 
 import org.kucher.socialservice.service.dto.post.ResponsePostDTO;
 import org.kucher.socialservice.service.dto.subscription.ResponseSubscriptionDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,21 +23,36 @@ public class FeedService {
     }
 
 
-    public Page<ResponsePostDTO> read(UUID uuid, int page, int itemsPerPage) {
-        Pageable pageable = PageRequest.of(page, itemsPerPage);
+    public Page<ResponsePostDTO> read(UUID uuid, int page, int itemsPerPage, int sort) {
+        UUID muuid= UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        List<ResponseSubscriptionDTO> subscriptions;
+        if(muuid.equals(uuid)) {
+            Pageable pageable;
 
-        subscriptions = subscriptionService.read(uuid, false);
+            if (sort == 0) {
+                pageable = PageRequest.of(page, itemsPerPage);
+            } else if (sort == 1) {
+                pageable = PageRequest.of(page, itemsPerPage, Sort.by(Sort.Direction.ASC));
+            } else {
+                pageable = PageRequest.of(page, itemsPerPage, Sort.by(Sort.Direction.DESC));
+            }
 
-        List<ResponsePostDTO> postDTOS = new ArrayList<>();
+            List<ResponseSubscriptionDTO> subscriptions;
 
-        for (ResponseSubscriptionDTO subscription : subscriptions) {
-            List<ResponsePostDTO> topPosts = postService.get(subscription.getFollowedUser().getUuid());
-            postDTOS.addAll(topPosts.subList(0, Math.min(5, topPosts.size())));
+            subscriptions = subscriptionService.read(uuid, false);
+
+            List<ResponsePostDTO> postDTOS = new ArrayList<>();
+
+            for (ResponseSubscriptionDTO subscription : subscriptions) {
+                List<ResponsePostDTO> topPosts = postService.get(subscription.getFollowedUser().getUuid());
+                postDTOS.addAll(topPosts.subList(0, Math.min(5, topPosts.size())));
+            }
+
+            return new PageImpl<>(postDTOS, pageable, postDTOS.size());
         }
-
-        return new PageImpl<>(postDTOS, pageable, postDTOS.size());
+        else {
+            throw new AccessDeniedException("Access denied");
+        }
     }
 
 }
