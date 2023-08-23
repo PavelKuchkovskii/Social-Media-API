@@ -7,7 +7,6 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
-import springfox.documentation.service.VendorExtension;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -29,8 +28,14 @@ public class SwaggerConfig {
 
     private ApiInfo metaInfo() {
         return new ApiInfo(
-                "Atividades API REST",
-                "API REST de cadastro de atividades.",
+                "Social media API REST",
+                "The Java project is a RESTful API for a social media platform. The API allows users to perform" +
+                        " various actions such as registering, logging in, creating posts, chatting, following other users, " +
+                        "and getting their activity feed. The project is designed to be scalable and efficient, " +
+                        "with a focus on delivering a seamless user experience. The Java programming language is used " +
+                        "to develop the project, with various libraries and frameworks utilized to ensure optimal performance " +
+                        "and functionality. The project is built using industry-standard best practices and follows the principles " +
+                        "of clean code and good software design.",
                 "1.0",
                 "Terms of Service",
                 new Contact("Pavel Kuchkovskii", "www.socialservice.org/", "pavel.kuchkovskii@gmail.com"),
