@@ -1,5 +1,6 @@
 package org.kucher.socialservice.controller;
 
+import org.kucher.socialservice.controller.api.ISubscriptionController;
 import org.kucher.socialservice.dto.message.Message;
 import org.kucher.socialservice.service.SubscriptionServiceImpl;
 import org.kucher.socialservice.dto.subscription.CreateSubscriptionDTO;
@@ -16,14 +17,15 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/subscription")
-public class SubscriptionController {
+public class SubscriptionControllerImpl implements ISubscriptionController {
 
     private final ISubscriptionService service;
 
-    public SubscriptionController(SubscriptionServiceImpl service) {
+    public SubscriptionControllerImpl(SubscriptionServiceImpl service) {
         this.service = service;
     }
 
+    @Override
     @PostMapping
     public ResponseEntity<ResponseSubscriptionDTO> createSubscription(@Valid @RequestBody CreateSubscriptionDTO dto) {
 
@@ -32,6 +34,7 @@ public class SubscriptionController {
         return new ResponseEntity<>(created, HttpStatus.OK);
     }
 
+    @Override
     @GetMapping("/follower")
     public ResponseEntity<Page<ResponseSubscriptionDTO>> getFollowers(@RequestParam int page, @RequestParam int size) {
 
@@ -42,6 +45,7 @@ public class SubscriptionController {
         return new ResponseEntity<>(subscriptionDTOS, HttpStatus.OK);
     }
 
+    @Override
     @GetMapping("/followed")
     public ResponseEntity<Page<ResponseSubscriptionDTO>> getFollowedUsers(@RequestParam int page, @RequestParam int size) {
 
@@ -52,8 +56,9 @@ public class SubscriptionController {
         return new ResponseEntity<>(subscriptionDTOS, HttpStatus.OK);
     }
 
+    @Override
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Message> doDelete(@PathVariable("uuid")UUID uuid) {
+    public ResponseEntity<Message> deleteSubscription(@PathVariable("uuid")UUID uuid) {
 
         service.delete(uuid);
 

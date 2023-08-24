@@ -1,5 +1,6 @@
 package org.kucher.userservice.controller;
 
+import org.kucher.userservice.controller.api.IUserController;
 import org.kucher.userservice.service.UserService;
 import org.kucher.userservice.dto.UserDTO;
 import org.springframework.http.HttpStatus;
@@ -11,17 +12,17 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
-public class UserController {
+public class UserControllerImpl implements IUserController {
 
     private final UserService service;
     //private final ConfirmRegistrationService confirmService;
 
-    public UserController(UserService service) {
+    public UserControllerImpl(UserService service) {
         this.service = service;
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> doGetMe() {
+    public ResponseEntity<UserDTO> getMe() {
 
         UUID uuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -30,7 +31,7 @@ public class UserController {
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<UserDTO> doGetUser(@PathVariable("uuid")UUID uuid) {
+    public ResponseEntity<UserDTO> getUserByUuid(@PathVariable("uuid")UUID uuid) {
 
         UserDTO user = this.service.read(uuid);
 

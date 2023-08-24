@@ -1,5 +1,6 @@
 package org.kucher.userservice.controller;
 
+import org.kucher.userservice.controller.api.IAdminController;
 import org.kucher.userservice.service.UserService;
 import org.kucher.userservice.dto.UserByAdminDTO;
 import org.kucher.userservice.dto.UserDTO;
@@ -13,24 +14,26 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/users/admin/panel")
-public class AdminController {
+public class AdminControllerImpl implements IAdminController {
 
     private final UserService service;
 
-    public AdminController(UserService service) {
+    public AdminControllerImpl(UserService service) {
         this.service = service;
     }
 
+    @Override
     @PostMapping
-    public ResponseEntity<UserDTO> doPost(@Valid @RequestBody UserByAdminDTO dto) {
+    public ResponseEntity<UserDTO> createUserByAdmin(@Valid @RequestBody UserByAdminDTO dto) {
 
         UserDTO created = this.service.create(dto);
 
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
+    @Override
     @PatchMapping("/{uuid}/dt_update/{dt_update}")
-    public ResponseEntity<UserDTO> doUpdate(@PathVariable("uuid") UUID uuid,
+    public ResponseEntity<UserDTO> updateUserByAdmin(@PathVariable("uuid") UUID uuid,
                                             @PathVariable("dt_update") LocalDateTime dtUpdate,
                                             @Valid @RequestBody UserByAdminDTO dto) {
 

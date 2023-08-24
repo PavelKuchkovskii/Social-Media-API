@@ -1,5 +1,6 @@
 package org.kucher.userservice.controller;
 
+import org.kucher.userservice.controller.api.IAuthController;
 import org.kucher.userservice.dto.message.Message;
 import org.kucher.userservice.security.jwt.JwtTokenUtil;
 import org.kucher.userservice.service.UserService;
@@ -17,19 +18,19 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
-public class AuthController {
+public class AuthControllerImpl implements IAuthController {
 
     private final AuthenticationManager authenticationManager;
     private final UserService service;
 
-    public AuthController(AuthenticationManager authenticationManager, UserService service) {
+    public AuthControllerImpl(AuthenticationManager authenticationManager, UserService service) {
         this.authenticationManager = authenticationManager;
         this.service = service;
     }
 
     @PostMapping("/registration")
     @CrossOrigin(origins = "*")
-    public ResponseEntity<Message> doPost(@Valid @RequestBody UserCreateDTO dto) {
+    public ResponseEntity<Message> registerUser(@Valid @RequestBody UserCreateDTO dto) {
 
         service.create(dto);
 
@@ -38,7 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Message> doPost(@Valid @RequestBody UserLoginDTO dto) {
+    public ResponseEntity<Message> loginUser(@Valid @RequestBody UserLoginDTO dto) {
 
         // Создание аутентификационного объекта
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

@@ -1,5 +1,6 @@
 package org.kucher.socialservice.controller;
 
+import org.kucher.socialservice.controller.api.IFeedController;
 import org.kucher.socialservice.dto.post.ResponsePostDTO;
 import org.kucher.socialservice.service.api.IFeedService;
 import org.springframework.data.domain.Page;
@@ -15,11 +16,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/feed")
-public class FeedController {
+public class FeedControllerImpl implements IFeedController {
 
     private final IFeedService service;
 
-    public FeedController(IFeedService service) {
+    public FeedControllerImpl(IFeedService service) {
         this.service = service;
     }
 
@@ -27,8 +28,9 @@ public class FeedController {
     //0-none
     //1-asc !->
     //2-desc <-!
+    @Override
     @GetMapping
-    public ResponseEntity<Page<ResponsePostDTO>> doGet(@RequestParam int page, @RequestParam int size, @RequestParam int sort) {
+    public ResponseEntity<Page<ResponsePostDTO>> getFeedPage(@RequestParam int page, @RequestParam int size, @RequestParam int sort) {
 
         UUID uuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
