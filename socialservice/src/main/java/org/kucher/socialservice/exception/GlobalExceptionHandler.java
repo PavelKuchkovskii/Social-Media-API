@@ -2,6 +2,7 @@ package org.kucher.socialservice.exception;
 
 import org.kucher.socialservice.dto.message.Message;
 import org.kucher.socialservice.dto.message.MultipleMessage;
+import org.kucher.socialservice.exception.crud.api.CrudException;
 import org.kucher.socialservice.exception.rest.RestApiException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

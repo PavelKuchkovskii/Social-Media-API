@@ -5,7 +5,7 @@ import org.kucher.userservice.TestApplication;
 import org.kucher.userservice.model.User;
 import org.kucher.userservice.model.enums.EUserRole;
 import org.kucher.userservice.model.enums.EUserStatus;
-import org.kucher.userservice.repository.IUserDao;
+import org.kucher.userservice.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestPropertySource(properties = {"spring.profiles.active=test"})
 class UserDaoTest {
     @Autowired
-    private IUserDao dao;
+    private IUserRepository dao;
 
     @Test
     void findByEmail() {

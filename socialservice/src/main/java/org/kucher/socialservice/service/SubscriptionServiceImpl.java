@@ -2,7 +2,7 @@ package org.kucher.socialservice.service;
 
 import org.kucher.socialservice.event.MutualSubscriptionEvent;
 import org.kucher.socialservice.exception.crud.UserAlreadySubscribeException;
-import org.kucher.socialservice.repository.ISubscriptionDao;
+import org.kucher.socialservice.repository.ISubscriptionRepository;
 import org.kucher.socialservice.model.FriendRequest;
 import org.kucher.socialservice.model.Subscription;
 import org.kucher.socialservice.model.User;
@@ -37,13 +37,13 @@ import java.util.stream.Collectors;
 @Service
 public class SubscriptionServiceImpl implements ISubscriptionService {
 
-    private final ISubscriptionDao dao;
+    private final ISubscriptionRepository dao;
     private final IFriendRequestService friendRequestService;
     private final IFriendshipService friendshipService;
     private final IUserService userService;
     private final ApplicationEventPublisher eventPublisher;
 
-    public SubscriptionServiceImpl(ISubscriptionDao dao, IFriendRequestService friendRequestService, IFriendshipService friendshipService, IUserService userService, ApplicationEventPublisher eventPublisher) {
+    public SubscriptionServiceImpl(ISubscriptionRepository dao, IFriendRequestService friendRequestService, IFriendshipService friendshipService, IUserService userService, ApplicationEventPublisher eventPublisher) {
         this.dao = dao;
         this.friendRequestService = friendRequestService;
         this.friendshipService = friendshipService;

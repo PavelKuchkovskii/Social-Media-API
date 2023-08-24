@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Repository interface for managing Subscription entities.
  */
-public interface ISubscriptionDao extends JpaRepository<Subscription, UUID> {
+public interface ISubscriptionRepository extends JpaRepository<Subscription, UUID> {
 
     /**
      * Retrieves a page of Subscription entities associated with the given follower UUID.

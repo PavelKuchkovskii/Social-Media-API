@@ -1,6 +1,5 @@
 package org.kucher.socialservice.controller;
 
-import org.kucher.socialservice.service.FeedServiceImpl;
 import org.kucher.socialservice.dto.post.ResponsePostDTO;
 import org.kucher.socialservice.service.api.IFeedService;
 import org.springframework.data.domain.Page;

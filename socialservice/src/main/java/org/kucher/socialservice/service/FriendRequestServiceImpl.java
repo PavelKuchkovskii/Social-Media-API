@@ -3,7 +3,7 @@ package org.kucher.socialservice.service;
 import org.kucher.socialservice.event.FriendshipAcceptedEvent;
 import org.kucher.socialservice.service.api.IUserService;
 import org.kucher.socialservice.utill.Time.TimeUtil;
-import org.kucher.socialservice.repository.IFriendRequestDao;
+import org.kucher.socialservice.repository.IFriendRequestRepository;
 import org.kucher.socialservice.model.FriendRequest;
 import org.kucher.socialservice.model.Subscription;
 import org.kucher.socialservice.model.builder.FriendRequestBuilder;
@@ -36,11 +36,11 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class FriendRequestServiceImpl implements IFriendRequestService {
 
-    private final IFriendRequestDao dao;
+    private final IFriendRequestRepository dao;
     private final IUserService userService;
     private final ApplicationEventPublisher eventPublisher;
 
-    public FriendRequestServiceImpl(IFriendRequestDao dao, IUserService userService, ApplicationEventPublisher eventPublisher) {
+    public FriendRequestServiceImpl(IFriendRequestRepository dao, IUserService userService, ApplicationEventPublisher eventPublisher) {
         this.dao = dao;
         this.userService = userService;
         this.eventPublisher = eventPublisher;

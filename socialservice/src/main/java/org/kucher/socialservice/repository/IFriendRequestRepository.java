@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * Repository interface for managing FriendRequest entities.
  */
-public interface IFriendRequestDao extends JpaRepository<FriendRequest, UUID> {
+public interface IFriendRequestRepository extends JpaRepository<FriendRequest, UUID> {
 
     /**
      * Retrieves a page of FriendRequest entities with the given receiver UUID and status.

@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * Repository interface for managing Friendship entities.
  */
-public interface IFriendshipDao extends JpaRepository<Friendship, UUID> {
+public interface IFriendshipRepository extends JpaRepository<Friendship, UUID> {
 
     /**
      * Retrieves a page of Friendship entities associated with the given user UUID.

@@ -10,7 +10,7 @@ import java.util.UUID;
 /**
  * Repository interface for managing User entities.
  */
-public interface IUserDao extends JpaRepository<User, UUID> {
+public interface IUserRepository extends JpaRepository<User, UUID> {
 
     /**
      * Retrieves a User entity associated with the given email.

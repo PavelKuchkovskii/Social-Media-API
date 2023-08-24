@@ -5,6 +5,7 @@ import org.kucher.socialservice.dto.subscription.ResponseSubscriptionDTO;
 import org.kucher.socialservice.service.api.IFeedService;
 import org.kucher.socialservice.service.api.IPostService;
 import org.kucher.socialservice.service.api.ISubscriptionService;
+import org.kucher.socialservice.utill.comparator.ResponsePostDTOComparator;
 import org.springframework.data.domain.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,9 +27,12 @@ public class FeedServiceImpl implements IFeedService {
     private final ISubscriptionService subscriptionService;
     private final IPostService postService;
 
-    public FeedServiceImpl(ISubscriptionService subscriptionService, IPostService postService) {
+    private final ResponsePostDTOComparator responsePostDTOComparator;
+
+    public FeedServiceImpl(ISubscriptionService subscriptionService, IPostService postService, ResponsePostDTOComparator responsePostDTOComparator) {
         this.subscriptionService = subscriptionService;
         this.postService = postService;
+        this.responsePostDTOComparator = responsePostDTOComparator;
     }
 
     /**
@@ -49,19 +53,9 @@ public class FeedServiceImpl implements IFeedService {
         UUID muuid= UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
         if(muuid.equals(uuid)) {
-            Pageable pageable;
+            Pageable pageable = PageRequest.of(page, itemsPerPage);
 
-            if (sort == 0) {
-                pageable = PageRequest.of(page, itemsPerPage);
-            } else if (sort == 1) {
-                pageable = PageRequest.of(page, itemsPerPage, Sort.by(Sort.Direction.ASC));
-            } else {
-                pageable = PageRequest.of(page, itemsPerPage, Sort.by(Sort.Direction.DESC));
-            }
-
-            List<ResponseSubscriptionDTO> subscriptions;
-
-            subscriptions = subscriptionService.read(uuid, false);
+            List<ResponseSubscriptionDTO> subscriptions = subscriptionService.read(uuid, false);
 
             List<ResponsePostDTO> postDTOS = new ArrayList<>();
 
@@ -70,7 +64,15 @@ public class FeedServiceImpl implements IFeedService {
                 postDTOS.addAll(topPosts.subList(0, Math.min(5, topPosts.size())));
             }
 
+            if (sort == 1) {
+                postDTOS.sort(responsePostDTOComparator);
+            }
+            else if(sort == 2) {
+                postDTOS.sort(responsePostDTOComparator.reversed());
+            }
+
             return new PageImpl<>(postDTOS, pageable, postDTOS.size());
+
         }
         else {
             throw new AccessDeniedException("Access denied");

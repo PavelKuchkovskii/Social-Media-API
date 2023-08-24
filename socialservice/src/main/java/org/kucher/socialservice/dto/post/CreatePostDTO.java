@@ -1,25 +1,13 @@
 package org.kucher.socialservice.dto.post;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.UUID;
 
 public class CreatePostDTO {
-    @NotNull(message = "User uuid cannot be blank")
-    private UUID userUuid;
     @NotBlank(message = "Text cannot be blank")
     private String text;
     @NotBlank(message = "Title cannot be blank")
     private String title;
     private String imageBase64;
-
-    public UUID getUserUuid() {
-        return userUuid;
-    }
-
-    public void setUserUuid(UUID userUuid) {
-        this.userUuid = userUuid;
-    }
 
     public String getText() {
         return text;

@@ -1,6 +1,6 @@
 package org.kucher.userservice.service;
 
-import org.kucher.userservice.repository.IUserDao;
+import org.kucher.userservice.repository.IUserRepository;
 import org.kucher.userservice.model.User;
 import org.kucher.userservice.security.auth.CustomUserDetails;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,9 +20,9 @@ import java.util.Optional;
 @Service
 public class AuthServiceImpl implements UserDetailsService {
 
-    private final IUserDao dao;
+    private final IUserRepository dao;
 
-    public AuthServiceImpl(IUserDao dao) {
+    public AuthServiceImpl(IUserRepository dao) {
         this.dao = dao;
     }
 

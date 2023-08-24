@@ -1,6 +1,6 @@
 package org.kucher.socialservice.service;
 
-import org.kucher.socialservice.repository.IFriendshipDao;
+import org.kucher.socialservice.repository.IFriendshipRepository;
 import org.kucher.socialservice.model.FriendRequest;
 import org.kucher.socialservice.model.Friendship;
 import org.kucher.socialservice.model.Subscription;
@@ -27,10 +27,10 @@ import java.util.stream.Collectors;
 @Service
 public class FriendshipServiceImpl implements IFriendshipService {
 
-    private final IFriendshipDao dao;
+    private final IFriendshipRepository dao;
     private final IUserService userService;
 
-    public FriendshipServiceImpl(IFriendshipDao dao, IUserService userService) {
+    public FriendshipServiceImpl(IFriendshipRepository dao, IUserService userService) {
         this.dao = dao;
         this.userService = userService;
     }

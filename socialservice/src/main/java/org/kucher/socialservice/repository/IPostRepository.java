@@ -11,15 +11,15 @@ import java.util.UUID;
 /**
  * Repository interface for managing Post entities.
  */
-public interface IPostDao extends MongoRepository<Post, UUID> {
+public interface IPostRepository extends MongoRepository<Post, UUID> {
 
     /**
-     * Retrieves a list of top posts associated with the given user UUID, ordered by creation date in descending order.
+     * Retrieves a list of posts associated with a specific user's UUID.
      *
-     * @param uuid The UUID of the user.
-     * @return A list of top posts associated with the given user UUID.
+     * @param uuid The UUID of the user whose posts are being retrieved.
+     * @return A list of posts belonging to the specified user, ordered by creation date in descending order.
      */
-    List<Post> findTopPostsByUserUuidOrderByDtCreateDesc(UUID uuid);
+    List<Post> findAllByUserUuid(UUID uuid);
 
     /**
      * Retrieves a page of Post entities associated with the given user UUID.

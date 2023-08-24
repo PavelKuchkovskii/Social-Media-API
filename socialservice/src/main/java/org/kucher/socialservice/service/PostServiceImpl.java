@@ -2,7 +2,7 @@ package org.kucher.socialservice.service;
 
 import org.kucher.socialservice.service.api.IUserService;
 import org.kucher.socialservice.utill.Time.TimeUtil;
-import org.kucher.socialservice.repository.IPostDao;
+import org.kucher.socialservice.repository.IPostRepository;
 import org.kucher.socialservice.model.Post;
 import org.kucher.socialservice.model.User;
 import org.kucher.socialservice.model.builder.PostBuilder;
@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 public class PostServiceImpl implements IPostService {
-    private final IPostDao dao;
+    private final IPostRepository dao;
     private final IUserService userService;
 
-    public PostServiceImpl(IPostDao dao, IUserService userService) {
+    public PostServiceImpl(IPostRepository dao, IUserService userService) {
         this.dao = dao;
         this.userService = userService;
     }
@@ -47,37 +47,30 @@ public class PostServiceImpl implements IPostService {
      *
      * @param dto The DTO containing post information.
      * @return A {@link ResponsePostDTO} representing the created post.
-     * @throws AccessDeniedException If the provided user UUID does not match the authenticated user's UUID.
      */
     @Override
     @Transactional
     public ResponsePostDTO create(CreatePostDTO dto) {
         UUID userUuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        if(!userUuid.equals(dto.getUserUuid())) {
+        User user = userService.getUserByUuid(userUuid);
 
-            User user = userService.getUserByUuid(dto.getUserUuid());
-
-            PostDTO postDTO = new PostDTO();
-            postDTO.setUuid(UUID.randomUUID());
-            postDTO.setDtCreate(TimeUtil.now());
-            postDTO.setDtUpdate(postDTO.getDtCreate());
-            postDTO.setUserUuid(user.getUuid());
-            postDTO.setText(dto.getText());
-            postDTO.setTitle(dto.getTitle());
-            postDTO.setImageBase64(dto.getImageBase64());
+        PostDTO postDTO = new PostDTO();
+        postDTO.setUuid(UUID.randomUUID());
+        postDTO.setDtCreate(TimeUtil.now());
+        postDTO.setDtUpdate(postDTO.getDtCreate());
+        postDTO.setUserUuid(user.getUuid());
+        postDTO.setText(dto.getText());
+        postDTO.setTitle(dto.getTitle());
+        postDTO.setImageBase64(dto.getImageBase64());
 
 
-            if (validate(postDTO)) {
-                Post post = mapToEntity(postDTO);
-                dao.save(post);
-            }
-
-            return read(postDTO.getUuid());
+        if (validate(postDTO)) {
+            Post post = mapToEntity(postDTO);
+            dao.save(post);
         }
-        else {
-            throw new AccessDeniedException("Access denied");
-        }
+
+        return read(postDTO.getUuid());
     }
 
     /**
@@ -190,7 +183,7 @@ public class PostServiceImpl implements IPostService {
      */
     @Override
     public List<ResponsePostDTO> get(UUID uuid) {
-        return dao.findTopPostsByUserUuidOrderByDtCreateDesc(uuid).stream().map(this::mapToDTO).collect(Collectors.toList());
+        return dao.findAllByUserUuid(uuid).stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     /**

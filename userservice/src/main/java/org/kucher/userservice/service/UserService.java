@@ -4,7 +4,7 @@ import org.kucher.userservice.exception.crud.UserAlreadyExistsException;
 import org.kucher.userservice.exception.crud.UserAlreadyUpdatedException;
 import org.kucher.userservice.service.api.IUserService;
 import org.kucher.userservice.utill.Time.TimeUtil;
-import org.kucher.userservice.repository.IUserDao;
+import org.kucher.userservice.repository.IUserRepository;
 import org.kucher.userservice.model.User;
 import org.kucher.userservice.model.builder.UserBuilder;
 import org.kucher.userservice.model.enums.EUserRole;
@@ -30,11 +30,11 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class UserService implements IUserService {
 
-    private final IUserDao dao;
+    private final IUserRepository dao;
     private final ModelMapper mapper;
     private final PasswordEncoder encoder;
 
-    public UserService(IUserDao dao, ModelMapper mapper, PasswordEncoder encoder) {
+    public UserService(IUserRepository dao, ModelMapper mapper, PasswordEncoder encoder) {
         this.dao = dao;
         this.mapper = mapper;
         this.encoder = encoder;
