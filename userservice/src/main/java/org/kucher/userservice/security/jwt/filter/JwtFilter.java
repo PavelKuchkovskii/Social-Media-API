@@ -21,6 +21,10 @@ import java.util.Map;
 
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
+
+/**
+ * A filter to intercept and process incoming HTTP requests to validate JWT tokens and authenticate users.
+ */
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -56,7 +60,6 @@ public class JwtFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
         }
         catch (CustomJwtTokenException ex) {
-            // Обработка ошибки и формирование ответа
 
             //Not using Message for the sake of flexibility
             //Using Map

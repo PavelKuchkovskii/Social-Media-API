@@ -2,7 +2,6 @@ package org.kucher.socialservice.exception;
 
 import org.kucher.socialservice.dto.message.Message;
 import org.kucher.socialservice.dto.message.MultipleMessage;
-import org.kucher.socialservice.exception.crud.api.CrudException;
 import org.kucher.socialservice.exception.rest.RestApiException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * Global exception handler that provides centralized handling of exceptions across the application.
+ * This class extends ResponseEntityExceptionHandler to customize exception handling and provide consistent error responses.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 

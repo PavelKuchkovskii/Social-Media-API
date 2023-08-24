@@ -1,8 +1,8 @@
 package org.kucher.userservice.controller;
 
 import org.kucher.userservice.service.UserService;
-import org.kucher.userservice.service.dto.UserByAdminDTO;
-import org.kucher.userservice.service.dto.UserDTO;
+import org.kucher.userservice.dto.UserByAdminDTO;
+import org.kucher.userservice.dto.UserDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,10 +33,9 @@ public class AdminController {
 
     @PatchMapping("/{uuid}/dt_update/{dt_update}")
     public ResponseEntity<UserDTO> doUpdate(@PathVariable("uuid") UUID uuid,
-                                            @PathVariable("dt_update") String dt_update,
+                                            @PathVariable("dt_update") LocalDateTime dtUpdate,
                                             @Valid @RequestBody UserByAdminDTO dto) {
 
-        LocalDateTime dtUpdate = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(dt_update)), ZoneOffset.UTC);
 
         UserDTO created = this.service.update(uuid, dtUpdate, dto);
 

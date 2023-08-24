@@ -1,30 +1,34 @@
 package org.kucher.userservice.service;
 
-import org.kucher.userservice.config.exception.api.crud.UserAlreadyExistsException;
-import org.kucher.userservice.config.exception.api.crud.UserAlreadyUpdatedException;
-import org.kucher.userservice.config.utill.Time.TimeUtil;
-import org.kucher.userservice.dao.api.IUserDao;
-import org.kucher.userservice.dao.entity.User;
-import org.kucher.userservice.dao.entity.builder.UserBuilder;
-import org.kucher.userservice.dao.entity.enums.EUserRole;
-import org.kucher.userservice.dao.entity.enums.EUserStatus;
-import org.kucher.userservice.service.dto.UserByAdminDTO;
-import org.kucher.userservice.service.dto.UserCreateDTO;
-import org.kucher.userservice.service.dto.UserDTO;
+import org.kucher.userservice.exception.crud.UserAlreadyExistsException;
+import org.kucher.userservice.exception.crud.UserAlreadyUpdatedException;
+import org.kucher.userservice.service.api.IUserService;
+import org.kucher.userservice.utill.Time.TimeUtil;
+import org.kucher.userservice.repository.IUserDao;
+import org.kucher.userservice.model.User;
+import org.kucher.userservice.model.builder.UserBuilder;
+import org.kucher.userservice.model.enums.EUserRole;
+import org.kucher.userservice.model.enums.EUserStatus;
+import org.kucher.userservice.dto.UserByAdminDTO;
+import org.kucher.userservice.dto.UserCreateDTO;
+import org.kucher.userservice.dto.UserDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ServerErrorException;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+
+/**
+ * Service implementation for managing user-related operations.
+ */
 @Service
 @Transactional(readOnly = true)
-public class UserService {
+public class UserService implements IUserService {
 
     private final IUserDao dao;
     private final ModelMapper mapper;
@@ -35,6 +39,16 @@ public class UserService {
         this.mapper = mapper;
         this.encoder = encoder;
     }
+
+    /**
+     * Creates a new user based on the provided UserCreateDTO.
+     *
+     * @param dto The UserCreateDTO containing user information for creation.
+     * @return The UserDTO representing the created user.
+     * @throws UserAlreadyExistsException If a user with the provided email already exists.
+     * @throws RuntimeException If an error occurs during user creation or retrieval.
+     */
+    @Override
     @Transactional
     public UserDTO create(UserCreateDTO dto) {
 
@@ -65,6 +79,15 @@ public class UserService {
         }
     }
 
+    /**
+     * Creates a new user by an admin based on the provided UserByAdminDTO.
+     *
+     * @param dto The UserByAdminDTO containing user information for creation by an admin.
+     * @return The UserDTO representing the created user.
+     * @throws UserAlreadyExistsException If a user with the provided email already exists.
+     * @throws RuntimeException If an error occurs during user creation or retrieval.
+     */
+    @Override
     @Transactional
     public UserDTO create(UserByAdminDTO dto) {
 
@@ -91,6 +114,18 @@ public class UserService {
         return this.read(userDTO.getUuid());
     }
 
+    /**
+     * Updates user information with the provided UserByAdminDTO.
+     *
+     * @param uuid The UUID of the user to be updated.
+     * @param dtUpdate The LocalDateTime representing the last update timestamp of the user.
+     * @param dto The UserByAdminDTO containing updated user information.
+     * @return The UserDTO representing the updated user.
+     * @throws IllegalArgumentException If the provided UUID is invalid.
+     * @throws UserAlreadyUpdatedException If the user has already been updated.
+     * @throws RuntimeException If an error occurs during user update or retrieval.
+     */
+    @Override
     @Transactional
     public UserDTO update(UUID uuid, LocalDateTime dtUpdate, UserByAdminDTO dto) {
 
@@ -128,6 +163,14 @@ public class UserService {
         }
     }
 
+    /**
+     * Retrieves user information by UUID.
+     *
+     * @param uuid The UUID of the user to be retrieved.
+     * @return The UserDTO representing the retrieved user.
+     * @throws EntityNotFoundException If the user with the provided UUID is not found.
+     */
+    @Override
     public UserDTO read(UUID uuid) {
         Optional<User> user = dao.findById(uuid);
 
@@ -138,7 +181,7 @@ public class UserService {
         return this.mapToDTO(user.get());
     }
 
-
+    @Override
     public boolean validate(UserDTO dto) {
         if (dto.getUuid() == null) {
             throw new IllegalArgumentException("Uuid cannot be null");
@@ -158,10 +201,12 @@ public class UserService {
         return true;
     }
 
+    @Override
     public UserDTO mapToDTO(User user) {
         return mapper.map(user, UserDTO.class);
     }
 
+    @Override
     public User mapToEntity(UserDTO userDTO) {
         return UserBuilder
                 .create()

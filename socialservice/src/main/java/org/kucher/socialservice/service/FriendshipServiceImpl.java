@@ -1,6 +1,6 @@
 package org.kucher.socialservice.service;
 
-import org.kucher.socialservice.repository.api.IFriendshipDao;
+import org.kucher.socialservice.repository.IFriendshipDao;
 import org.kucher.socialservice.model.FriendRequest;
 import org.kucher.socialservice.model.Friendship;
 import org.kucher.socialservice.model.Subscription;

@@ -1,10 +1,10 @@
 package org.kucher.userservice.controller;
 
-import org.kucher.userservice.config.api.Message;
+import org.kucher.userservice.dto.message.Message;
 import org.kucher.userservice.security.jwt.JwtTokenUtil;
 import org.kucher.userservice.service.UserService;
-import org.kucher.userservice.service.dto.UserCreateDTO;
-import org.kucher.userservice.service.dto.UserLoginDTO;
+import org.kucher.userservice.dto.UserCreateDTO;
+import org.kucher.userservice.dto.UserLoginDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;

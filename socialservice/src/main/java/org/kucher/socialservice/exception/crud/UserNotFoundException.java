@@ -1,12 +1,17 @@
 package org.kucher.socialservice.exception.crud;
 
 
-import org.kucher.socialservice.exception.crud.api.CrudException;
+/**
+ * Exception class indicating that a user was not found.
+ */
+public class UserNotFoundException extends RuntimeException {
 
-public class UserNotFoundException extends CrudException {
-
+    /**
+     * Constructs a new UserNotFoundException with the specified error message.
+     *
+     * @param message The error message for the exception.
+     */
     public UserNotFoundException(String message) {
         super(message);
     }
-
 }

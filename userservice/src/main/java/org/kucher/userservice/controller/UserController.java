@@ -1,7 +1,7 @@
 package org.kucher.userservice.controller;
 
 import org.kucher.userservice.service.UserService;
-import org.kucher.userservice.service.dto.UserDTO;
+import org.kucher.userservice.dto.UserDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;

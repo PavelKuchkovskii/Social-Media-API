@@ -3,7 +3,7 @@ package org.kucher.userservice.security.config;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
 import org.kucher.userservice.security.auth.CustomDaoAuthenticationProvider;
 import org.kucher.userservice.security.jwt.filter.JwtFilter;
-import org.kucher.userservice.service.AuthService;
+import org.kucher.userservice.service.AuthServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,7 +23,7 @@ import java.io.IOException;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
-    private final AuthService authService;
+    private final AuthServiceImpl authServiceImpl;
     private final JwtFilter filter;
 
 
@@ -36,7 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new CustomDaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(authService);
+        authenticationProvider.setUserDetailsService(authServiceImpl);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
         return authenticationProvider;
     }
@@ -46,9 +46,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
-    public SecurityConfig(AuthService authService, PasswordEncoder passwordEncoder, JwtFilter filter) {
+    public SecurityConfig(AuthServiceImpl authServiceImpl, PasswordEncoder passwordEncoder, JwtFilter filter) {
         this.passwordEncoder = passwordEncoder;
-        this.authService = authService;
+        this.authServiceImpl = authServiceImpl;
         this.filter = filter;
     }
 

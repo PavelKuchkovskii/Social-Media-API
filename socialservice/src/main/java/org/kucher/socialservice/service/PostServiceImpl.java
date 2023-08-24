@@ -2,7 +2,7 @@ package org.kucher.socialservice.service;
 
 import org.kucher.socialservice.service.api.IUserService;
 import org.kucher.socialservice.utill.Time.TimeUtil;
-import org.kucher.socialservice.repository.api.IPostDao;
+import org.kucher.socialservice.repository.IPostDao;
 import org.kucher.socialservice.model.Post;
 import org.kucher.socialservice.model.User;
 import org.kucher.socialservice.model.builder.PostBuilder;

@@ -7,10 +7,21 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+/**
+ * Converter class to convert a string representation of a timestamp to a {@link LocalDateTime} object.
+ */
 @Component
 public class StringToLocalDateTimeConverter implements Converter<String, LocalDateTime> {
+
+    /**
+     * Converts a string representation of a timestamp to a {@link LocalDateTime} object.
+     *
+     * @param source The string representation of the timestamp.
+     * @return A {@link LocalDateTime} object representing the converted timestamp.
+     */
     @Override
     public LocalDateTime convert(String source) {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(source)), ZoneId.of("UTC"));
+        long timestamp = Long.parseLong(source);
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("UTC"));
     }
 }

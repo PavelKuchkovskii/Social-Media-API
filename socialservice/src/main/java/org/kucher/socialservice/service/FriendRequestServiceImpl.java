@@ -3,7 +3,7 @@ package org.kucher.socialservice.service;
 import org.kucher.socialservice.event.FriendshipAcceptedEvent;
 import org.kucher.socialservice.service.api.IUserService;
 import org.kucher.socialservice.utill.Time.TimeUtil;
-import org.kucher.socialservice.repository.api.IFriendRequestDao;
+import org.kucher.socialservice.repository.IFriendRequestDao;
 import org.kucher.socialservice.model.FriendRequest;
 import org.kucher.socialservice.model.Subscription;
 import org.kucher.socialservice.model.builder.FriendRequestBuilder;

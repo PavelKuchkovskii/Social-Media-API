@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class for handling JWT (JSON Web Token) operations.
+ */
 @Component
 public class JwtTokenUtil {
 
@@ -46,6 +49,12 @@ public class JwtTokenUtil {
         return payload.getData().toStringUtf8();
     }
 
+    /**
+     * Generates an access token (JWT) based on the provided authentication details.
+     *
+     * @param auth The authentication object containing user details.
+     * @return The generated access token.
+     */
     public static String generateAccessToken(Authentication auth) {
         String jwtSecret = getSecret();
 
@@ -64,6 +73,14 @@ public class JwtTokenUtil {
                 .compact();
     }
 
+    /**
+     * Retrieves an Authentication object from the provided JWT token.
+     *
+     * @param token The JWT token from which to retrieve authentication details.
+     * @return An Authentication object containing user details.
+     * @throws InvalidJwtTokenException if the token is invalid.
+     * @throws ExpiredJwtTokenException if the token has expired.
+     */
     public static Authentication getAuthentication(String token) {
         String jwtSecret = getSecret();
 

@@ -5,6 +5,9 @@ import org.kucher.socialservice.service.FriendshipServiceImpl;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Listener class to handle mutual subscription events.
+ */
 @Component
 public class MutualSubscriptionEventListener implements ApplicationListener<MutualSubscriptionEvent> {
 
@@ -14,6 +17,12 @@ public class MutualSubscriptionEventListener implements ApplicationListener<Mutu
         this.friendshipServiceImpl = friendshipServiceImpl;
     }
 
+
+    /**
+     * Handles the mutual subscription event by creating a friendship based on the subscription.
+     *
+     * @param event The mutual subscription event.
+     */
     @Override
     public void onApplicationEvent(MutualSubscriptionEvent event) {
         //Create friendship

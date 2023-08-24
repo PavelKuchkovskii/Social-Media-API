@@ -1,9 +1,9 @@
 package org.kucher.userservice.security.auth;
 
-import org.kucher.userservice.config.exception.api.auth.EmailNotConfirmException;
-import org.kucher.userservice.config.exception.api.auth.NotActivatedException;
-import org.kucher.userservice.config.exception.api.auth.UserDeactivatedException;
-import org.kucher.userservice.dao.entity.enums.EUserStatus;
+import org.kucher.userservice.exception.auth.EmailNotConfirmException;
+import org.kucher.userservice.exception.auth.NotActivatedException;
+import org.kucher.userservice.exception.auth.UserDeactivatedException;
+import org.kucher.userservice.model.enums.EUserStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -31,7 +31,7 @@ public class CustomDaoAuthenticationProvider extends DaoAuthenticationProvider {
         validate((CustomUserDetails) userDetails);
     }
 
-    public void validate(CustomUserDetails user) {
+    private void validate(CustomUserDetails user) {
         if(user.getStatus() == EUserStatus.WAITING_VERIFICATION || user.getStatus() == EUserStatus.WAITING_CONFIRM) {
             throw new EmailNotConfirmException("Check you email and tap to link to confirm registration");
         }

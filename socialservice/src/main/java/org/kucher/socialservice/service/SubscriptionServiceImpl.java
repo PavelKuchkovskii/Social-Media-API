@@ -2,7 +2,7 @@ package org.kucher.socialservice.service;
 
 import org.kucher.socialservice.event.MutualSubscriptionEvent;
 import org.kucher.socialservice.exception.crud.UserAlreadySubscribeException;
-import org.kucher.socialservice.repository.api.ISubscriptionDao;
+import org.kucher.socialservice.repository.ISubscriptionDao;
 import org.kucher.socialservice.model.FriendRequest;
 import org.kucher.socialservice.model.Subscription;
 import org.kucher.socialservice.model.User;

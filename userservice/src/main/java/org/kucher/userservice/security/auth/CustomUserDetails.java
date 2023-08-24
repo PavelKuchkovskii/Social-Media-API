@@ -1,6 +1,6 @@
 package org.kucher.userservice.security.auth;
 
-import org.kucher.userservice.dao.entity.enums.EUserStatus;
+import org.kucher.userservice.model.enums.EUserStatus;
 import org.kucher.userservice.security.auth.api.ICustomUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 
