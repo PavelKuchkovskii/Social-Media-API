@@ -7,10 +7,11 @@ import org.kucher.userservice.dao.entity.enums.EUserStatus;
 import javax.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User implements IUser {
     @Id
     private UUID uuid;
@@ -89,5 +90,33 @@ public class User implements IUser {
     @Override
     public EUserStatus getStatus() {
         return this.status;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "uuid=" + uuid +
+                ", dtCreate=" + dtCreate +
+                ", dtUpdate=" + dtUpdate +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", password='" + password + '\'' +
+                ", role=" + role +
+                ", status=" + status +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(uuid, user.uuid) && Objects.equals(dtCreate, user.dtCreate) && Objects.equals(dtUpdate, user.dtUpdate) && Objects.equals(email, user.email) && Objects.equals(name, user.name) && Objects.equals(surname, user.surname) && Objects.equals(password, user.password) && role == user.role && status == user.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid, dtCreate, dtUpdate, email, name, surname, password, role, status);
     }
 }
