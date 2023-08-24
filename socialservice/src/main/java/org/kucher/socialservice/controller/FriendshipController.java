@@ -1,7 +1,8 @@
 package org.kucher.socialservice.controller;
 
-import org.kucher.socialservice.service.FriendshipService;
-import org.kucher.socialservice.service.dto.friendhip.ResponseFriendshipDTO;
+import org.kucher.socialservice.service.FriendshipServiceImpl;
+import org.kucher.socialservice.dto.friendhip.ResponseFriendshipDTO;
+import org.kucher.socialservice.service.api.IFriendshipService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,9 @@ import java.util.UUID;
 @RequestMapping("/friend")
 public class FriendshipController {
 
-    private final FriendshipService service;
+    private final IFriendshipService service;
 
-    public FriendshipController(FriendshipService service) {
+    public FriendshipController(IFriendshipService service) {
         this.service = service;
     }
 

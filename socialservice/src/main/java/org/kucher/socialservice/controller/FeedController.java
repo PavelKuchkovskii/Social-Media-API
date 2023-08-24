@@ -1,7 +1,8 @@
 package org.kucher.socialservice.controller;
 
-import org.kucher.socialservice.service.FeedService;
-import org.kucher.socialservice.service.dto.post.ResponsePostDTO;
+import org.kucher.socialservice.service.FeedServiceImpl;
+import org.kucher.socialservice.dto.post.ResponsePostDTO;
+import org.kucher.socialservice.service.api.IFeedService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,9 @@ import java.util.UUID;
 @RequestMapping("/feed")
 public class FeedController {
 
-    private final FeedService service;
+    private final IFeedService service;
 
-    public FeedController(FeedService service) {
+    public FeedController(IFeedService service) {
         this.service = service;
     }
 

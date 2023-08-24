@@ -5,9 +5,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.kucher.socialservice.service.dto.post.CreatePostDTO;
-import org.kucher.socialservice.service.dto.post.ResponsePostDTO;
-import org.kucher.socialservice.service.dto.post.UpdatePostDTO;
+import org.kucher.socialservice.dto.message.Message;
+import org.kucher.socialservice.dto.post.CreatePostDTO;
+import org.kucher.socialservice.dto.post.ResponsePostDTO;
+import org.kucher.socialservice.dto.post.UpdatePostDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,7 +72,7 @@ public interface IPostController {
             produces = {"text/plain"},
             consumes = {"application/json"},
             method = RequestMethod.DELETE)
-    ResponseEntity<String> deletePost(@ApiParam(
+    ResponseEntity<Message> deletePost(@ApiParam(
             value = "A UUID value representing a saved post.",
             example = "{foo: whatever, bar: whatever2}")
                                     @PathVariable("uuid") UUID uuid);

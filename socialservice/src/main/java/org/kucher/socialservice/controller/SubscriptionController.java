@@ -1,28 +1,31 @@
 package org.kucher.socialservice.controller;
 
-import org.kucher.socialservice.service.SubscriptionService;
-import org.kucher.socialservice.service.dto.subscription.CreateSubscriptionDTO;
-import org.kucher.socialservice.service.dto.subscription.ResponseSubscriptionDTO;
+import org.kucher.socialservice.dto.message.Message;
+import org.kucher.socialservice.service.SubscriptionServiceImpl;
+import org.kucher.socialservice.dto.subscription.CreateSubscriptionDTO;
+import org.kucher.socialservice.dto.subscription.ResponseSubscriptionDTO;
+import org.kucher.socialservice.service.api.ISubscriptionService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/subscription")
 public class SubscriptionController {
 
-    private final SubscriptionService service;
+    private final ISubscriptionService service;
 
-    public SubscriptionController(SubscriptionService service) {
+    public SubscriptionController(SubscriptionServiceImpl service) {
         this.service = service;
     }
 
     @PostMapping
-    public ResponseEntity<ResponseSubscriptionDTO> createSubscription(@RequestBody CreateSubscriptionDTO dto) {
+    public ResponseEntity<ResponseSubscriptionDTO> createSubscription(@Valid @RequestBody CreateSubscriptionDTO dto) {
 
         ResponseSubscriptionDTO created = service.create(dto);
 
@@ -50,11 +53,11 @@ public class SubscriptionController {
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<String> doDelete(@PathVariable("uuid")UUID uuid) {
+    public ResponseEntity<Message> doDelete(@PathVariable("uuid")UUID uuid) {
 
         service.delete(uuid);
 
-        return new ResponseEntity<>("Subscription has been rejected", HttpStatus.OK);
+        return new ResponseEntity<>(new Message("info", "Subscription has been rejected"), HttpStatus.OK);
     }
 
 

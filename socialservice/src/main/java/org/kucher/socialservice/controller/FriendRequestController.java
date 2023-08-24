@@ -1,14 +1,16 @@
 package org.kucher.socialservice.controller;
 
-import org.kucher.socialservice.service.FriendRequestService;
-import org.kucher.socialservice.service.dto.friendrequest.ResponseFriendRequestDTO;
-import org.kucher.socialservice.service.dto.friendrequest.UpdateFriendRequestDTO;
+import org.kucher.socialservice.service.FriendRequestServiceImpl;
+import org.kucher.socialservice.dto.friendrequest.ResponseFriendRequestDTO;
+import org.kucher.socialservice.dto.friendrequest.UpdateFriendRequestDTO;
+import org.kucher.socialservice.service.api.IFriendRequestService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,14 +18,14 @@ import java.util.UUID;
 @RequestMapping("/friend")
 public class FriendRequestController {
 
-    private final FriendRequestService service;
+    private final IFriendRequestService service;
 
-    public FriendRequestController(FriendRequestService service) {
+    public FriendRequestController(IFriendRequestService service) {
         this.service = service;
     }
 
     @PatchMapping("/{uuid}/dt_update/{dt_update}")
-    public ResponseEntity<ResponseFriendRequestDTO> doUpdate(@RequestBody UpdateFriendRequestDTO dto, @PathVariable("uuid") UUID uuid, @PathVariable("dt_update") LocalDateTime dtUpdate) {
+    public ResponseEntity<ResponseFriendRequestDTO> doUpdate(@Valid @RequestBody UpdateFriendRequestDTO dto, @PathVariable("uuid") UUID uuid, @PathVariable("dt_update") LocalDateTime dtUpdate) {
 
         ResponseFriendRequestDTO created = service.update(dto, uuid, dtUpdate);
 
